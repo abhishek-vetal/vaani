@@ -53,7 +53,7 @@ export function TextInputPanel() {
             value={text}
             onChange={(e) => setText(e.target.value)}
             className="
-              h-40
+              h-41
               resize-none
               overflow-y-auto
               border-0
