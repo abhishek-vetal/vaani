@@ -67,6 +67,7 @@ export function QuickActionCard({
             hover:bg-white
             hover:shadow-md
             transition-all
+            group
           "
           asChild
         >

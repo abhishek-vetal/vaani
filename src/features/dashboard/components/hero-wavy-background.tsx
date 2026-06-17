@@ -1,3 +1,5 @@
+"use client";
+
 import { WavyBackground } from "@/components/ui/wavy-background";
 
 export function HeroWavyBackground() {
@@ -14,5 +16,5 @@ export function HeroWavyBackground() {
         className="hidden"
       />
     </div>
-  )
+  );
 }

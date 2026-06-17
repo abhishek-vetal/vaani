@@ -99,10 +99,11 @@ export function WavyBackground({
               nt
             ) * 100;
 
-          ctx.lineTo(
-            x,
-            y + waveYOffset
-          );
+          if (x === 0) {
+            ctx.moveTo(x, y + waveYOffset);
+          } else {
+            ctx.lineTo(x, y + waveYOffset);
+          }
         }
 
         ctx.stroke();
@@ -171,8 +172,8 @@ export function WavyBackground({
         style={
           isSafari
             ? {
-                filter: `blur(${blur}px)`,
-              }
+              filter: `blur(${blur}px)`,
+            }
             : undefined
         }
       />

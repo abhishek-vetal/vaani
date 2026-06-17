@@ -4,7 +4,7 @@ import { HeroWavyBackground } from "@/features/dashboard/components/hero-wavy-ba
 import { TextInputPanel } from "@/features/dashboard/components/text-input-panel";
 import { QuickActionPanel } from '@/features/dashboard/components/quick-action-panel';
 
-export default function Dashboard() {
+export default function DashboardPage() {
   return (
     <div className="relative">
       <PageHeader title="Dashboard" className="lg:hidden" />

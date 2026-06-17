@@ -19,15 +19,15 @@ export function PageHeader({ title, className }: { title: string, className?: st
 
       <div className="flex items-center gap-3">
         <Button variant="outline" size="sm" asChild>
-          <Link href="mailto:business@vaani.com">
-            {/* Feedback */}
+          <Link href="mailto:business@codewithantonio.com">
             <ThumbsUp />
+            <span className="hidden lg:block">Feedback</span>
           </Link>
         </Button>
         <Button variant="outline" size="sm" asChild>
-          <Link href="mailto:business@vaani.com">
-            {/* Need help? */}
+          <Link href="mailto:business@codewithantonio.com">
             <Headphones />
+            <span className="hidden lg:block">Need help?</span>
           </Link>
         </Button>
       </div>
