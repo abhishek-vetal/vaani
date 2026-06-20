@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import { ClerkProvider } from "@clerk/nextjs";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { TRPCReactProvider } from "@/trpc/client";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -26,8 +27,10 @@ export default function RootLayout({
     <html lang="en" className={`${inter.className} h-full antialiased`}>
       <body className="min-h-screen">
         <ClerkProvider>
-          <TooltipProvider>{children}</TooltipProvider>
-          <Toaster richColors />
+          <TRPCReactProvider>
+            <TooltipProvider>{children}</TooltipProvider>
+            <Toaster richColors />
+          </TRPCReactProvider>
         </ClerkProvider>
       </body>
     </html>
