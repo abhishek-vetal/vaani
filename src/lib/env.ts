@@ -12,7 +12,7 @@ export const env = createEnv({
     R2_BUCKET_NAME: z.string().min(1),
   },
 
-  runtimeEnv: {
-    DATABASE_URL: process.env.DATABASE_URL,
-  },
+  experimental__runtimeEnv: {},
+  skipValidation: !!process.env.SKIP_ENV_VALIDATION,
+
 });
