@@ -1,11 +1,16 @@
-"use client"
+"use client";
+
+import { useSuspenseQuery } from "@tanstack/react-query";
 
 import { useTRPC } from "@/trpc/client";
-import { SettingPanel } from "../components/settings-panel";
-import { TextInputPanel } from "../components/text-input-panel";
-import { defaultTTSValues, TextToSpeechForm, TTSFormValues } from "../components/text-to-speech-form";
-import { VoicePreviewPlaceholder } from "../components/voice-preview-placeholder";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { TextInputPanel } from "@/features/text-to-speech/components/text-input-panel";
+import { VoicePreviewPlaceholder } from "@/features/text-to-speech/components/voice-preview-placeholder";
+import { SettingsPanel } from "@/features/text-to-speech/components/settings-panel";
+import {
+  TextToSpeechForm,
+  defaultTTSValues,
+  type TTSFormValues
+} from "@/features/text-to-speech/components/text-to-speech-form";
 import { TTSVoicesProvider } from "../contexts/tts-voices-context";
 
 export function TextToSpeechView({
@@ -13,22 +18,20 @@ export function TextToSpeechView({
 }: {
   initialValues?: Partial<TTSFormValues>;
 }) {
-
-  const trpc = useTRPC()
-  const {
+  const trpc = useTRPC();
+  const { 
     data: voices,
   } = useSuspenseQuery(trpc.voices.getAll.queryOptions());
 
   const { custom: customVoices, system: systemVoices } = voices;
 
   const allVoices = [...customVoices, ...systemVoices];
-
   const fallbackVoiceId = allVoices[0]?.id ?? "";
 
   // Requested voice may no longer exist (deleted); fall back to first available
   const resolvedVoiceId =
     initialValues?.voiceId &&
-      allVoices.some((v) => v.id === initialValues.voiceId)
+    allVoices.some((v) => v.id === initialValues.voiceId)
       ? initialValues.voiceId
       : fallbackVoiceId;
 
@@ -41,15 +44,14 @@ export function TextToSpeechView({
   return (
     <TTSVoicesProvider value={{ customVoices, systemVoices, allVoices }}>
       <TextToSpeechForm defaultValues={defaultValues}>
-        <div className="flex">
-          <div className="flex-1 flex flex-col min-h-screen">
+        <div className="flex min-h-0 flex-1 overflow-hidden">
+          <div className="flex min-h-0 flex-1 flex-col">
             <TextInputPanel />
             <VoicePreviewPlaceholder />
           </div>
-
-          <SettingPanel />
+          <SettingsPanel />
         </div>
       </TextToSpeechForm>
     </TTSVoicesProvider>
-  )
-}
+  );
+};

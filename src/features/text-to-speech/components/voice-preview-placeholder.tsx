@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 
 export function VoicePreviewPlaceholder() {
   return (
-    <div className="hidden flex-1 flex-col items-center justify-center gap-5 border-t lg:flex">
+    <div className="hidden flex-1 lg:flex h-full flex-col items-center justify-center gap-6 border-t">
       <div className="flex flex-col items-center gap-2.5">
         <div className="flex items-center -space-x-2">
           <div className="rounded-full bg-cyan-50 p-3 text-cyan-600">

@@ -18,8 +18,9 @@ export function GenerateButton({
     <Button
       size={size}
       disabled={disabled}
-      onSubmit={onSubmit}
+      onClick={onSubmit}
       className={className}
+      type="button"
     >
       {
         isSubmitting ? (

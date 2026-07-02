@@ -3,7 +3,7 @@ import { History, Settings } from "lucide-react";
 import { SettingsPanelSettings } from "@/features/text-to-speech/components/settings-panel-settings";
 import { SettingsPanelHistory } from "@/features/text-to-speech/components/settings-panel-history";
 
-export function SettingPanel() {
+export function SettingsPanel() {
   const tabTriggerClassName = "gap-2 bg-transparent rounded-none border-x-0 border-t-0 border-b-px border-b-transparent shadow-none data-[state=active]:border-b-foreground group-data-[variant=default]/tabs-list:data-[state=active]:shadow-none";
 
   return (
