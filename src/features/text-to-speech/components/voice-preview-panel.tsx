@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react"; // ✅ Added useEffect here
 import { Pause, Play, Download, Redo, Undo } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -50,6 +50,19 @@ export function VoicePreviewPanel({
     url: audioUrl,
     autoplay: true,
   });
+
+  // The Resize Tripwire to prevent "Ghost Audio" on mobile
+  useEffect(() => {
+    const handleResize = () => {
+      // 1024px matches Tailwind's 'lg' breakpoint
+      if (window.innerWidth < 1024 && isPlaying) {
+        togglePlayPause();
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [isPlaying, togglePlayPause]);
 
   const handleDownload = () => {
     setIsDownloading(true);
@@ -185,4 +198,4 @@ export function VoicePreviewPanel({
       </div>
     </div>
   );
-};
+}

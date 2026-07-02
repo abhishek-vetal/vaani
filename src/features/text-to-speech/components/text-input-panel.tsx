@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { useTypedAppFormContext } from "@/hooks/use-app-form"
 import { ttsFormOptions } from "./text-to-speech-form"
 import { GenerateButton } from "./generate-button"
+import { PromptSuggestions } from "./prompt-suggestions"
 
 export function TextInputPanel() {
   const form = useTypedAppFormContext(ttsFormOptions)
@@ -72,7 +73,11 @@ export function TextInputPanel() {
                         </div>
                       </div>
                     ) : (
-                      <div className="hidden lg:block text-sm text-muted-foreground">Get started by typing or pasting the text above</div>
+                      <div className="hidden lg:block text-sm text-muted-foreground">
+                        <PromptSuggestions
+                          onSelect={(prompt) => form.setFieldValue("text", prompt)}
+                        />
+                      </div>
                     )
                   }
                 </div>
