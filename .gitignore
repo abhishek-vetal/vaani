@@ -44,3 +44,7 @@ next-env.d.ts
 
 # added to cloudflare so no need
 /scripts/system-voices
+
+__pycache__
+
+chatterbox_tts.py

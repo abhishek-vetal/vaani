@@ -17,8 +17,8 @@ export function TextInputPanel() {
         (isSubmitting) => (
           <form.Field name="text">
             {(field) => (
-              <div className="flex flex-col flex-1 gap-3">
-                <div className="relative flex-1">
+              <div className="flex h-full min-h-0 flex-col flex-1 gap-3">
+                <div className="relative flex-1 min-h-0">
                   <Textarea
                     placeholder="Start typing or paste your text here..."
                     value={field.state.value}
