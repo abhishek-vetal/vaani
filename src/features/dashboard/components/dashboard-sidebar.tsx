@@ -15,6 +15,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { UsageContainer } from "@/features/billing/components/usage-container";
 import { OrganizationSwitcher, useClerk, UserButton } from "@clerk/nextjs";
 import { Home, LayoutGrid, AudioLines, Volume2, LucideIcon, Headphones, Settings } from "lucide-react";
 import Image from "next/image";
@@ -185,6 +186,9 @@ export default function DashboardSidebar() {
       <div className="border-b border-dotted" />
 
       <SidebarFooter>
+
+        <UsageContainer />
+
         <SidebarMenu>
           <SidebarMenuItem>
             <UserButton

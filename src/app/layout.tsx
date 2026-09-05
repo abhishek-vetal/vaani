@@ -5,6 +5,7 @@ import { Toaster } from "sonner";
 import { ClerkProvider } from "@clerk/nextjs";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { TRPCReactProvider } from "@/trpc/client";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -28,7 +29,11 @@ export default function RootLayout({
       <body className="min-h-screen">
         <ClerkProvider>
           <TRPCReactProvider>
-            <TooltipProvider>{children}</TooltipProvider>
+            <TooltipProvider>
+              <NuqsAdapter>
+                {children}
+              </NuqsAdapter>
+            </TooltipProvider>
             <Toaster richColors />
           </TRPCReactProvider>
         </ClerkProvider>

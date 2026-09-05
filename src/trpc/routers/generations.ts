@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { polar } from "@/lib/polar";
+import { env } from "@/lib/env";
 import { TRPCError } from "@trpc/server";
 import { chatterbox } from "@/lib/chatterbox-client";
 import prisma from "@/lib/db";
@@ -27,7 +29,7 @@ export const generationsRouter = createTRPCRouter({
         audioUrl: `/api/audio/${generation.id}`,
       };
     }),
-
+  
   getAll: orgProcedure.query(async ({ ctx }) => {
     const generations = await prisma.generation.findMany({
       where: { orgId: ctx.orgId },
@@ -53,6 +55,27 @@ export const generationsRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input, ctx }) => {
+      // Check for active subscription before generation
+      try {
+        const customerState = await polar.customers.getStateExternal({
+          externalId: ctx.orgId,
+        });
+        const hasActiveSubscription =
+          (customerState.activeSubscriptions ?? []).length > 0;
+        if (!hasActiveSubscription) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "SUBSCRIPTION_REQUIRED",
+          });
+        }
+      } catch (err) {
+        if (err instanceof TRPCError) throw err;
+        // Customer doesn't exist in Polar yet -> no subscription
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "SUBSCRIPTION_REQUIRED",
+        });
+      }
 
       const voice = await prisma.voice.findUnique({
         where: {
@@ -84,9 +107,6 @@ export const generationsRouter = createTRPCRouter({
       }
 
       const { data, error } = await chatterbox.POST("/generate", {
-        headers: {
-          "X-Api-Key": process.env.CHATTERBOX_API_KEY as string, // Adds the VIP pass!
-        },
         body: {
           prompt: input.text,
           voice_key: voice.r2ObjectKey,
@@ -156,7 +176,7 @@ export const generationsRouter = createTRPCRouter({
                 id: generationId,
               },
             })
-            .catch(() => { });
+            .catch(() => {});
         }
 
         throw new TRPCError({
@@ -172,8 +192,24 @@ export const generationsRouter = createTRPCRouter({
         });
       }
 
+      // Ingest usage event to Polar (fire-and-forget, don't block response)
+      polar.events
+        .ingest({
+          events: [
+            {
+              name: env.POLAR_METER_TTS_GENERATION,
+              externalCustomerId: ctx.orgId,
+              metadata: { [env.POLAR_METER_TTS_PROPERTY]: input.text.length },
+              timestamp: new Date(),
+            },
+          ],
+        })
+        .catch(() => {
+          // Silently fail - don't break the user experience for metering errors
+        });
+
       return {
         id: generationId,
       };
     }),
-});
+}); 
