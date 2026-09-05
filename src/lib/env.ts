@@ -5,6 +5,12 @@ import * as z from "zod";
 
 export const env = createEnv({
   server: {
+    POLAR_ACCESS_TOKEN: z.string().min(1),
+    POLAR_SERVER: z.enum(["sandbox", "production"]).default("sandbox"),
+    POLAR_PRODUCT_ID: z.string().min(1),
+    POLAR_METER_VOICE_CREATION: z.string().min(1),
+    POLAR_METER_TTS_GENERATION: z.string().min(1),
+    POLAR_METER_TTS_PROPERTY: z.string().min(1),
     DATABASE_URL: z.string().min(1),
     R2_ACCOUNT_ID: z.string().min(1),
     R2_ACCESS_KEY_ID: z.string().min(1),
