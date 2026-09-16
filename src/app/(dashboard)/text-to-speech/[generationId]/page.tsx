@@ -1,6 +1,8 @@
 import { TextToSpeechDetailView } from "@/features/text-to-speech/views/text-to-speech-detail-view";
 import { trpc, HydrateClient, prefetch } from "@/trpc/server";
 
+// params is used for dynamic route parameters 
+// searchParams is used for search parameters like ?text=hello&voiceId=lsdkjflj
 export default async function TextToSpeechDetailPage({
   params,
 }: {

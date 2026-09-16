@@ -1,5 +1,3 @@
-//This is used for env variables mispellings.
-
 import { createEnv } from "@t3-oss/env-nextjs";
 import * as z from "zod";
 

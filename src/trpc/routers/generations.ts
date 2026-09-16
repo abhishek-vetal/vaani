@@ -8,12 +8,18 @@ import { uploadAudio } from "@/lib/r2";
 import { TEXT_MAX_LENGTH } from "@/features/text-to-speech/data/constants";
 import { createTRPCRouter, orgProcedure } from "../init";
 
+// this router is basically a collection of backend operations related to generations
 export const generationsRouter = createTRPCRouter({
   getById: orgProcedure
-    .input(z.object({ id: z.string() }))
+    .input(z.object({
+      id: z.string()
+    }))
+    // we use query since we are reading the data
     .query(async ({ input, ctx }) => {
       const generation = await prisma.generation.findUnique({
         where: { id: input.id, orgId: ctx.orgId },
+        // we are not going to send orgId, r2ObjectKey since this is not required to user
+        // we hide the r2ObjectKey since its a internal storage detail
         omit: {
           orgId: true,
           r2ObjectKey: true,
@@ -21,6 +27,7 @@ export const generationsRouter = createTRPCRouter({
       });
 
       if (!generation) {
+        // we use TRPCError to throw error from the backend
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
@@ -29,20 +36,31 @@ export const generationsRouter = createTRPCRouter({
         audioUrl: `/api/audio/${generation.id}`,
       };
     }),
-  
-  getAll: orgProcedure.query(async ({ ctx }) => {
-    const generations = await prisma.generation.findMany({
-      where: { orgId: ctx.orgId },
-      orderBy: { createdAt: "desc" },
-      omit: {
-        orgId: true,
-        r2ObjectKey: true,
-      },
-    });
 
-    return generations;
-  }),
+  getAll: orgProcedure
+    .query(async ({ ctx }) => {
+      const generations = await prisma.generation.findMany({
+        where: { orgId: ctx.orgId },
+        orderBy: { createdAt: "desc" },
+        omit: {
+          orgId: true,
+          r2ObjectKey: true,
+        },
+      });
 
+      if (!generations) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      return generations;
+    }),
+
+  // zod validation 
+  //  Frontend validation
+  // → better UX
+
+  // Backend validation
+  // → security + data integrity
   create: orgProcedure
     .input(
       z.object({
@@ -77,6 +95,7 @@ export const generationsRouter = createTRPCRouter({
         });
       }
 
+      // finding voice to generate audio 
       const voice = await prisma.voice.findUnique({
         where: {
           id: input.voiceId,
@@ -99,6 +118,8 @@ export const generationsRouter = createTRPCRouter({
         });
       }
 
+      // The voice record exists, but we can't generate audio 
+      // because the underlying voice audio isn't available
       if (!voice.r2ObjectKey) {
         throw new TRPCError({
           code: "PRECONDITION_FAILED",
@@ -116,6 +137,7 @@ export const generationsRouter = createTRPCRouter({
           repetition_penalty: input.repetitionPenalty,
           norm_loudness: true,
         },
+        // treat the response as binary data rather than normal JSON
         parseAs: "arrayBuffer",
       });
 
@@ -126,6 +148,7 @@ export const generationsRouter = createTRPCRouter({
         });
       }
 
+      // make sure the actual response is really binary audio data
       if (!(data instanceof ArrayBuffer)) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -176,7 +199,6 @@ export const generationsRouter = createTRPCRouter({
                 id: generationId,
               },
             })
-            .catch(() => {});
         }
 
         throw new TRPCError({
@@ -200,12 +222,11 @@ export const generationsRouter = createTRPCRouter({
               name: env.POLAR_METER_TTS_GENERATION,
               externalCustomerId: ctx.orgId,
               metadata: { [env.POLAR_METER_TTS_PROPERTY]: input.text.length },
-              timestamp: new Date(),
             },
           ],
         })
-        .catch(() => {
-          // Silently fail - don't break the user experience for metering errors
+        .catch((error) => {
+          console.error("Failed to ingest Polar TTS generation event:", error);
         });
 
       return {

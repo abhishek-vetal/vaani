@@ -8,6 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+
 import {
   Drawer,
   DrawerClose,
@@ -18,11 +19,13 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { VoiceCreateForm } from "./voice-create-form";
+
 import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useCheckout } from "@/features/billing/hooks/use-checkout";
-import { useCallback } from "react";
+import { VoiceCreateForm } from "./voice-create-form";
+
+import React, { useCallback } from "react";
 import { toast } from "sonner";
 
 interface VoiceCreateDialogProps {
@@ -33,12 +36,20 @@ interface VoiceCreateDialogProps {
 
 export function VoiceCreateDialog({
   children,
-  open,
-  onOpenChange,
+  open: externalOpen,
+  onOpenChange: externalOnOpenChange,
 }: VoiceCreateDialogProps) {
-  const isMobile = useIsMobile();
+  const [internalOpen, setInternalOpen] = React.useState(false);
+  const isControlled = externalOpen !== undefined;
+  const open = isControlled ? externalOpen : internalOpen;
+  const onOpenChange = isControlled ? externalOnOpenChange : setInternalOpen;
 
+  const isMobile = useIsMobile();
   const { checkout } = useCheckout();
+
+  const handleClose = useCallback(() => {
+    onOpenChange?.(false);
+  }, [onOpenChange]);
 
   const handleError = useCallback(
     (message: string) => {
@@ -52,8 +63,7 @@ export function VoiceCreateDialog({
       } else {
         toast.error(message);
       }
-    },
-    [checkout],
+    }, [checkout],
   );
 
   if (isMobile) {
@@ -71,6 +81,7 @@ export function VoiceCreateDialog({
           <VoiceCreateForm
             scrollable
             onError={handleError}
+            onSuccess={handleClose}
             footer={(submit) => (
               <DrawerFooter>
                 {submit}
@@ -83,21 +94,20 @@ export function VoiceCreateDialog({
         </DrawerContent>
       </Drawer>
     );
-  };
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {children && <DialogTrigger asChild>{children}</DialogTrigger>}
-      <DialogContent>
+      <DialogContent className="sm:max-w-120 max-h-[90vh] overflow-y-auto">
         <DialogHeader className="text-left">
           <DialogTitle>Create custom voice</DialogTitle>
           <DialogDescription>
             Upload or record an audio sample to add a new voice to your library.
           </DialogDescription>
         </DialogHeader>
-        <VoiceCreateForm onError={handleError} />
-        <VoiceCreateForm  />
+        <VoiceCreateForm onError={handleError} onSuccess={handleClose} />
       </DialogContent>
     </Dialog>
   );
-};
+}

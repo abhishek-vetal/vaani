@@ -4,7 +4,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { formOptions } from "@tanstack/react-form";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useTRPC } from "@/trpc/client";
 import { useAppForm } from "@/hooks/use-app-form";
@@ -13,12 +13,15 @@ import { useCheckout } from "@/features/billing/hooks/use-checkout";
 const ttsFormSchema = z.object({
   text: z.string().min(1, "Please enter some text"),
   voiceId: z.string().min(1, "Please select a voice"),
+  // below are voice generation settings 
   temperature: z.number(),
   topP: z.number(),
   topK: z.number(),
   repetitionPenalty: z.number(),
 });
 
+// we tell zod take the schema and generate the TypeScript type from it
+// when using useTypedAppFormContext(ttsFormOptions)
 export type TTSFormValues = z.infer<typeof ttsFormSchema>;
 
 export const defaultTTSValues: TTSFormValues = {
@@ -30,28 +33,38 @@ export const defaultTTSValues: TTSFormValues = {
   repetitionPenalty: 1.2,
 };
 
+// these are the defualt values for my TTS form which I will use in the child components
 export const ttsFormOptions = formOptions({
   defaultValues: defaultTTSValues,
 });
 
 export function TextToSpeechForm({
   children,
-  defaultValues,
+  defaultValuesFromView,
 }: {
   children: React.ReactNode;
-  defaultValues?: TTSFormValues;
+  defaultValuesFromView?: TTSFormValues;
 }) {
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const router = useRouter();
+
+//   Query
+// → get data
+
+//   Mutation
+// → create / update / delete / perform action
+// we are performing these to generate audio
   const createMutation = useMutation(
     trpc.generations.create.mutationOptions({}),
   );
 
   const { checkout } = useCheckout();
 
+  // this is used to create the form
   const form = useAppForm({
     ...ttsFormOptions,
-    defaultValues: defaultValues ?? defaultTTSValues,
+    defaultValues: defaultValuesFromView ?? defaultTTSValues,
     validators: {
       onSubmit: ttsFormSchema,
     },
@@ -67,6 +80,10 @@ export function TextToSpeechForm({
         });
 
         toast.success("Audio generated successfully!");
+        queryClient.invalidateQueries(trpc.billing.getStatus.queryFilter());
+        setTimeout(() => {
+          queryClient.invalidateQueries(trpc.billing.getStatus.queryFilter());
+        }, 1500);
         router.push(`/text-to-speech/${data.id}`);
       } catch (error) {
         const message =
@@ -86,5 +103,6 @@ export function TextToSpeechForm({
     },
   });
 
+  // This makes the form available to the components inside it
   return <form.AppForm>{children}</form.AppForm>;
 };

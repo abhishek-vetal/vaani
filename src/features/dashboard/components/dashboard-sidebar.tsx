@@ -16,11 +16,13 @@ import {
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UsageContainer } from "@/features/billing/components/usage-container";
+import { VoiceCreateDialog } from "@/features/voices/components/voice-create-dialog";
 import { OrganizationSwitcher, useClerk, UserButton } from "@clerk/nextjs";
 import { Home, LayoutGrid, AudioLines, Volume2, LucideIcon, Headphones, Settings } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 
 interface MenuItem {
@@ -51,6 +53,7 @@ function NavSection({ label, items, pathname }: NavSectionProps) {
                 <SidebarMenuButton
                   asChild={!!item.url}
                   onClick={item.onClick}
+                  // Displays the item's name when the user hovers over it
                   tooltip={item.title}
                   isActive={!!item.url && (pathname === item.url || pathname?.startsWith(`${item.url}/`))}
                   className="h-9 px-3 py-2 text-[13px] tracking-tight font-medium border border-transparent data-[active=true]:border-border data-[active=true]:shadow-[0px_1px_1px_0px_rgba(44,54,53,0.03),inset_0px_0px_0px_2px_white]"
@@ -76,9 +79,14 @@ function NavSection({ label, items, pathname }: NavSectionProps) {
   )
 }
 
-export default function DashboardSidebar() {
+export function DashboardSidebar() {
+  // used to get the path: /text-to-speech if the url is https://domain.com/text-to-speech
+  // we use this inorder to highlight the current navMenutItem
   const pathname = usePathname()
+  // use this to open the clerk OrganizationProfile
   const clerk = useClerk()
+  // used to open the voice cloning where we upload our own voice 
+  const [voiceDialogOpen, setVoiceDialogOpen] = useState(false);
 
   const mainMenuItems: MenuItem[] = [
     {
@@ -99,6 +107,7 @@ export default function DashboardSidebar() {
     {
       title: "Voice cloning",
       icon: Volume2,
+      onClick: () => setVoiceDialogOpen(true),
     },
   ];
 
@@ -116,104 +125,112 @@ export default function DashboardSidebar() {
   ];
 
   return (
-    <Sidebar variant="sidebar" collapsible="icon">
-      <SidebarHeader>
-        <div className="flex items-center gap-3 group-data-[collapsible=icon]:justify-center">
-          <Image
-            src="/logo.png"
-            alt="Vaani logo"
-            width={42}
-            height={42}
-            className="shrink-0"
-          />
+    <>
+      <VoiceCreateDialog
+        open={voiceDialogOpen}
+        onOpenChange={(val) => setVoiceDialogOpen(val)}
+      />
 
-          <div className="flex flex-col leading-none group-data-[collapsible=icon]:hidden">
-            <h1 className="text-[18px] font-extrabold tracking-[-0.04em] text-red-950">
-              Vaani
-            </h1>
+      <Sidebar variant="sidebar" collapsible="icon">
+        <SidebarHeader>
+          <div className="flex items-center gap-3 group-data-[collapsible=icon]:justify-center">
+            <Image
+              src="/logo.png"
+              alt="Vaani logo"
+              width={42}
+              height={42}
+              className="shrink-0"
+            />
 
-            <p className="mt-1 text-[12px] font-semibold tracking-[-0.01em] text-zinc-400">
-              Voices that connect
-            </p>
+            <div className="flex flex-col leading-none group-data-[collapsible=icon]:hidden">
+              <h1 className="text-[18px] font-extrabold tracking-[-0.04em] text-red-950">
+                Vaani
+              </h1>
+
+              <p className="mt-1 text-[12px] font-semibold tracking-[-0.01em] text-zinc-400">
+                Voices that connect
+              </p>
+            </div>
+
+            <SidebarTrigger className="ml-auto lg:hidden" />
           </div>
 
-          <SidebarTrigger className="ml-auto lg:hidden" />
-        </div>
-
-        <SidebarMenu>
-          <SidebarMenuItem className="mt-2">
-            <OrganizationSwitcher
-              hidePersonal
-              fallback={
-                <Skeleton
-                  className="h-8.5 w-full group-data-[collapsible=icon]:size-8 rounded-md border bg-white"
-                />
-              }
-              appearance={{
-                elements: {
-                  rootBox:
-                    "w-full! group-data-[collapsible=icon]:w-auto! group-data-[collapsible=icon]:flex! group-data-[collapsible=icon]:justify-center!",
-                  organizationSwitcherTrigger:
-                    "w-full! justify-between! bg-white! border! border-border! rounded-md! pl-1! pr-2! py-1! gap-3! group-data-[collapsible=icon]:w-auto! group-data-[collapsible=icon]:p-1! shadow-[0px_1px_1.5px_0px_rgba(44,54,53,0.03)]!",
-                  organizationPreview: "gap-2!",
-                  organizationPreviewAvatarBox: "size-7! group-data-[collapsible=icon]:size-6! rounded-sm!",
-                  organizationPreviewTextContainer:
-                    "text-xs! tracking-tight! font-medium! text-foreground! group-data-[collapsible=icon]:hidden!",
-                  organizationPreviewMainIdentifier: "text-[13px]!",
-                  organizationSwitcherTriggerIcon:
-                    "size-4! text-sidebar-foreground! group-data-[collapsible=icon]:hidden!",
-                },
-              }}
-            />
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-
-      <div className="border-b border-dotted" />
-
-      <SidebarContent>
-        <NavSection
-          items={mainMenuItems}
-          pathname={pathname}
-        />
-        <NavSection
-          label="OTHERS"
-          items={othersMenuItems}
-          pathname={pathname}
-        />
-      </SidebarContent>
-
-      <div className="border-b border-dotted" />
-
-      <SidebarFooter>
-
-        <UsageContainer />
-
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <UserButton
-              showName
-              fallback={
-                <Skeleton className="h-8.5 w-full group-data-[collapsible=icon]:size-8 rounded-md border border-border bg-white" />
-              }
-              appearance={{
-                elements: {
-                  rootBox:
-                    "w-full! group-data-[collapsible=icon]:w-auto! group-data-[collapsible=icon]:flex! group-data-[collapsible=icon]:justify-center!",
-                  userButtonTrigger:
-                    "w-full! justify-between! bg-white! border! border-border! rounded-md! pl-1! pr-2! py-1! shadow-[0px_1px_1.5px_0px_rgba(44,54,53,0.03)]! group-data-[collapsible=icon]:w-auto! group-data-[collapsible=icon]:p-1! group-data-[collapsible=icon]:after:hidden! [--border:color-mix(in_srgb,transparent,var(--clerk-color-neutral,#000000)_15%)]!",
-                  userButtonBox: "flex-row-reverse! gap-2!",
-                  userButtonOuterIdentifier: "text-[13px]! tracking-tight! font-medium! text-foreground! pl-0! group-data-[collapsible=icon]:hidden!",
-                  userButtonAvatarBox: "size-6!",
+          <SidebarMenu>
+            <SidebarMenuItem className="mt-2">
+              <OrganizationSwitcher
+                hidePersonal={true}
+                fallback={
+                  <Skeleton
+                    className="h-8.5 w-full group-data-[collapsible=icon]:size-8 rounded-md border bg-white"
+                  />
                 }
-              }}
-            />
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
-      <SidebarRail />
-    </Sidebar>
+                appearance={{
+                  elements: {
+                    rootBox:
+                      "w-full! group-data-[collapsible=icon]:w-auto! group-data-[collapsible=icon]:flex! group-data-[collapsible=icon]:justify-center!",
+                    organizationSwitcherTrigger:
+                      "w-full! justify-between! bg-white! border! border-border! rounded-md! pl-1! pr-2! py-1! gap-3! group-data-[collapsible=icon]:w-auto! group-data-[collapsible=icon]:p-1! shadow-[0px_1px_1.5px_0px_rgba(44,54,53,0.03)]!",
+                    organizationPreview: "gap-2!",
+                    organizationPreviewAvatarBox:
+                      "size-7! group-data-[collapsible=icon]:size-6! rounded-sm!",
+                    organizationPreviewTextContainer:
+                      "text-xs! tracking-tight! font-medium! text-foreground! group-data-[collapsible=icon]:hidden!",
+                    organizationPreviewMainIdentifier: "text-[13px]!",
+                    organizationSwitcherTriggerIcon:
+                      "size-4! text-sidebar-foreground! group-data-[collapsible=icon]:hidden!",
+                  },
+                }}
+              />
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarHeader>
+
+        <div className="border-b border-dotted" />
+
+        <SidebarContent>
+          <NavSection
+            items={mainMenuItems}
+            pathname={pathname}
+          />
+          <NavSection
+            label="OTHERS"
+            items={othersMenuItems}
+            pathname={pathname}
+          />
+        </SidebarContent>
+
+        <div className="border-b border-dotted" />
+
+        <SidebarFooter>
+          {/* shows the user consumed amount */}
+          <UsageContainer />
+
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <UserButton
+                showName={true}
+                fallback={
+                  <Skeleton className="h-8.5 w-full group-data-[collapsible=icon]:size-8 rounded-md border border-border bg-white" />
+                }
+                appearance={{
+                  elements: {
+                    rootBox:
+                      "w-full! group-data-[collapsible=icon]:w-auto! group-data-[collapsible=icon]:flex! group-data-[collapsible=icon]:justify-center!",
+                    userButtonTrigger:
+                      "w-full! justify-between! bg-white! border! border-border! rounded-md! pl-1! pr-2! py-1! shadow-[0px_1px_1.5px_0px_rgba(44,54,53,0.03)]! group-data-[collapsible=icon]:w-auto! group-data-[collapsible=icon]:p-1! group-data-[collapsible=icon]:after:hidden! [--border:color-mix(in_srgb,transparent,var(--clerk-color-neutral,#000000)_15%)]!",
+                    userButtonBox: "flex-row-reverse! gap-2!",
+                    userButtonOuterIdentifier:
+                      "text-[13px]! tracking-tight! font-medium! text-foreground! pl-0! group-data-[collapsible=icon]:hidden!",
+                    userButtonAvatarBox: "size-6!",
+                  }
+                }}
+              />
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarFooter>
+
+        <SidebarRail />
+      </Sidebar>
+    </>
   );
 }
-
-

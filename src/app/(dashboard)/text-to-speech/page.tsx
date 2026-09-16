@@ -14,12 +14,17 @@ export default async function TextToSpeechPage({
 
   const { text, voiceId } = await searchParams
 
-   prefetch(trpc.voices.getAll.queryOptions())
-   prefetch(trpc.generations.getAll.queryOptions())
+  // we use prefetch inorder to get the data before rendering
+  // HydrateClient → make that prefetched data available to client-side code
+  // client access this prefetch data using useSuspenseQuery()
+
+  // trpc → identifies which backend procedures to fetch
+  prefetch(trpc.voices.getAll.queryOptions())
+  prefetch(trpc.generations.getAll.queryOptions())
 
   return (
     <HydrateClient>
-      <TextToSpeechView initialValues={{text, voiceId}} />
+      <TextToSpeechView initialValues={{ text, voiceId }} />
     </HydrateClient>
   );
 }

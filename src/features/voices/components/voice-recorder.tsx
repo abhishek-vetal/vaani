@@ -58,7 +58,7 @@ export function VoiceRecorder({
 
   if (error) {
     return (
-      <div className="flex flex-col items-center gap-4 rounded-2xl border border-destructive/50 bg-destructive/5 px-6 py-10">
+      <div className="flex flex-col items-center gap-3 rounded-2xl border border-destructive/50 bg-destructive/5 px-6 py-6">
         <p className="text-center text-sm text-destructive">{error}</p>
         <Button
           type="button"
@@ -129,13 +129,14 @@ export function VoiceRecorder({
     return (
       <div className="flex flex-col overflow-hidden rounded-2xl border">
          <div ref={containerRef} className="w-full" />
-         <div className="flex items-center justify-between border-t p-4">
-            <p className="text-[28px] font-semibold leading-[1.2] tracking-tight">
+         <div className="flex items-center justify-between border-t px-4 py-2.5">
+            <p className="text-xl font-semibold leading-[1.2] tracking-tight">
               {formatTime(elapsedTime)}
             </p>
             <Button 
               type="button" 
               variant="destructive" 
+              size="sm"
               onClick={handleStop}
             >
               <Square className="size-3" />
@@ -149,19 +150,19 @@ export function VoiceRecorder({
   return (
     <div
       className={cn(
-        "flex cursor-pointer flex-col items-center justify-center gap-4 overflow-hidden rounded-2xl border px-6 py-10",
+        "flex cursor-pointer flex-col items-center justify-center gap-3 overflow-hidden rounded-2xl border px-6 py-6 transition-colors",
         isInvalid && "border-destructive",
       )}
     >
-      <div className="flex size-12 items-center justify-center rounded-xl bg-muted">
+      <div className="flex size-10 items-center justify-center rounded-xl bg-muted">
         <Mic className="size-5 text-muted-foreground" />
       </div>
 
-      <div className="flex flex-col items-center gap-1.5">
-        <p className="text-base font-semibold tracking-tight">
+      <div className="flex flex-col items-center gap-1">
+        <p className="text-sm font-semibold tracking-tight">
           Record your voice
         </p>
-        <p className="text-center text-sm text-muted-foreground">
+        <p className="text-center text-xs text-muted-foreground">
           Click record to start capturing audio
         </p>
       </div>

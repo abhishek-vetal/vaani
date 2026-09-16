@@ -1,13 +1,13 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// prisma schema definition
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
 
+// it will generate the prisma client code 
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
 }
 
+// we are using postgresql database
 datasource db {
   provider = "postgresql"
 }
@@ -44,7 +44,7 @@ model Voice {
   variant     VoiceVariant
   r2ObjectKey String?
 
-  generations Generation[]
+  generations Generation[] // one voice will have many generations therefore, 1:M
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -52,8 +52,6 @@ model Voice {
   @@index([variant])
   @@index([orgId])
 }
-
-// 1:M relation
 
 model Generation {
   id String @id @default(cuid())

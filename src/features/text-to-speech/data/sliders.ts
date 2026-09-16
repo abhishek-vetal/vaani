@@ -9,7 +9,7 @@ interface Slider {
   defaultValue: number;
 };
 
-// default values for the sliders.
+// default values for the sliders 
 export const sliders: Slider[] = [
   {
     id: "temperature",

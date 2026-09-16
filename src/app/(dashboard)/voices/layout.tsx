@@ -1,10 +1,14 @@
-import { VoicesLayout } from "@/features/voices/views/voices-layout";
+import { DashboardMobileHeader } from "@/components/dashboard-mobile-header";
 
-
-export default function Layout({ 
+export default function VoicesLayout({
   children
-}: { 
+}: {
   children: React.ReactNode
 }) {
-  return <VoicesLayout>{children}</VoicesLayout>;
-};
+  return (
+    <div className="flex h-full min-h-0 flex-col overflow-hidden">
+      <DashboardMobileHeader title="Voices" />
+      {children}
+    </div>
+  );
+}

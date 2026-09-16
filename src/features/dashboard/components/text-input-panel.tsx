@@ -20,20 +20,16 @@ export function TextInputPanel() {
     if (!trimmed) return
 
     router.push(
+      // encodeURIComponent is used so that dealing with special character will be easy for url 
+      // space to %20 
       `/text-to-speech?text=${encodeURIComponent(trimmed)}`
     )
   }
 
   return (
     <div
-      className="
-      rounded-[28px]
-      bg-linear-to-br
-      from-cyan-400
-      via-fuchsia-300
-      to-cyan-100
-      p-px
-      shadow-md
+      className="rounded-[28px] bg-linear-to-br from-cyan-400 via-fuchsia-300 to-cyan-100
+      p-px shadow-md
     "
     >
       <div
@@ -82,7 +78,7 @@ export function TextInputPanel() {
                 ) : (
                   <>
                     <span className="tabular-nums font-medium">
-                      ₹{(text.length * COST_PER_UNIT).toFixed(4)}
+                      ₹{(text.length * COST_PER_UNIT).toFixed(3)}
                     </span>{" "}
                     estimated
                   </>

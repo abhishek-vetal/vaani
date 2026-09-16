@@ -1,41 +1,33 @@
 "use client";
 
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useCallback, useEffect, useRef, useState } from "react";
 import WaveSurfer from "wavesurfer.js";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 interface UseWaveSurferOptions {
   url?: string;
   autoplay?: boolean;
-  onReady?: () => void;
-  onError?: (error: Error) => void;
 }
-
-interface UseWaveSurferReturn {
-  containerRef: React.RefObject<HTMLDivElement | null>;
-  isPlaying: boolean;
-  isReady: boolean;
-  currentTime: number;
-  duration: number;
-  togglePlayPause: () => void;
-  seekForward: (seconds?: number) => void;
-  seekBackward: (seconds?: number) => void;
-};
 
 export function useWaveSurfer({
   url,
   autoplay,
-  onReady,
-  onError,
 }: UseWaveSurferOptions) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const wavesurferRef = useRef<WaveSurfer | null>(null);
-  const isMobile = useIsMobile();
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    if (isMobile) {
+      wavesurferRef.current?.pause();
+    }
+  }, [isMobile]);
 
   useEffect(() => {
     if (!containerRef.current || !url) return;
@@ -49,8 +41,8 @@ export function useWaveSurfer({
 
     const ws = WaveSurfer.create({
       container: containerRef.current,
-      waveColor: "#96999D", // matches --muted-foreground
-      progressColor: "#4A8A9A", // matches --chart-1 (teal-cyan)
+      waveColor: "#96999D",
+      progressColor: "#4A8A9A",
       cursorColor: "#4A8A9A",
       cursorWidth: 2,
       barWidth: 2,
@@ -67,9 +59,9 @@ export function useWaveSurfer({
       setIsReady(true);
       setDuration(ws.getDuration());
 
-      // Catch NotAllowedError when browser blocks autoplay without user interaction
-      if (autoplay) ws.play().catch(() => {});
-      onReady?.();
+      if (autoplay) {
+        ws.play().catch(() => {});
+      }
     });
 
     ws.on("play", () => setIsPlaying(true));
@@ -80,20 +72,19 @@ export function useWaveSurfer({
     ws.on("error", (error) => {
       if (destroyed) return;
       console.error("WaveSurfer error:", error);
-      onError?.(new Error(String(error)));
     });
 
     ws.load(url).catch((error) => {
       if (destroyed) return;
       console.error("WaveSurfer load error:", error);
-      onError?.(new Error(String(error)));
     });
 
     return () => {
       destroyed = true;
       ws.destroy();
+      wavesurferRef.current = null;
     };
-  }, [url, autoplay, onReady, onError, isMobile]);
+  }, [url, autoplay]);
 
   const togglePlayPause = useCallback(() => {
     wavesurferRef.current?.playPause();
@@ -103,16 +94,22 @@ export function useWaveSurfer({
     const ws = wavesurferRef.current;
     if (!ws) return;
 
-    const newTime = Math.min(ws.getCurrentTime() + seconds, ws.getDuration());
-    ws.seekTo(newTime / ws.getDuration());
+    const duration = ws.getDuration();
+    if (!duration) return;
+
+    const newTime = Math.min(ws.getCurrentTime() + seconds, duration);
+    ws.seekTo(newTime / duration);
   }, []);
 
   const seekBackward = useCallback((seconds = 5) => {
     const ws = wavesurferRef.current;
     if (!ws) return;
 
+    const duration = ws.getDuration();
+    if (!duration) return;
+
     const newTime = Math.max(ws.getCurrentTime() - seconds, 0);
-    ws.seekTo(newTime / ws.getDuration());
+    ws.seekTo(newTime / duration);
   }, []);
 
   return {
@@ -125,4 +122,4 @@ export function useWaveSurfer({
     seekForward,
     seekBackward,
   };
-};
+}

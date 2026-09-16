@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react"; // ✅ Added useEffect here
+import { useState } from "react";
 import { Pause, Play, Download, Redo, Undo } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -10,17 +10,22 @@ import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import { useWaveSurfer } from './../hooks/use-wavesurfer';
 
+// here id is optional since voice can be deleted 
+// so we should see at least the name of the voice on at the generated audio preview
 type VoicePreviewPanelVoice = {
   id?: string;
   name: string;
 };
 
+// this is helper which converts the seconds into the mm:ss format 
+// 85 seconds -> 01:25
 function formatTime(seconds: number): string {
   if (!seconds || isNaN(seconds)) return "00:00";
-  
+
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = Math.floor(seconds % 60);
-  
+
+  // provided padStart turns 5 into 05 
   return `${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
 }
 
@@ -34,13 +39,15 @@ export function VoicePreviewPanel({
   text: string;
 }) {
   const [isDownloading, setIsDownloading] = useState(false);
+  const selectedVoiceId = voice?.id ?? null;
   const selectedVoiceName = voice?.name ?? null;
-  const selectedVoiceSeed = voice?.id ?? null;
 
+  // here I am getting the audio controls
   const {
-    containerRef,
+    containerRef, // WaveSurfer referes this container to render waveform here
     isPlaying,
-    isReady,
+    isReady, // tell whether the waveform is ready if not then provide the spinner
+    // 00:42 / 01:35 -> current time is left one and duration is right one both provided in seconds
     currentTime,
     duration,
     togglePlayPause,
@@ -51,22 +58,10 @@ export function VoicePreviewPanel({
     autoplay: true,
   });
 
-  // The Resize Tripwire to prevent "Ghost Audio" on mobile
-  useEffect(() => {
-    const handleResize = () => {
-      // 1024px matches Tailwind's 'lg' breakpoint
-      if (window.innerWidth < 1024 && isPlaying) {
-        togglePlayPause();
-      }
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [isPlaying, togglePlayPause]);
-
   const handleDownload = () => {
     setIsDownloading(true);
 
+    // filename generation
     const safeName =
       text
         .slice(0, 50)
@@ -75,7 +70,9 @@ export function VoicePreviewPanel({
         .replace(/^-|-$/g, "")
         .toLowerCase() || "speech";
 
+    // creating a download link
     const link = document.createElement("a");
+    // url of the file which we want to download
     link.href = audioUrl;
     link.download = `${safeName}.wav`;
     document.body.appendChild(link);
@@ -105,6 +102,7 @@ export function VoicePreviewPanel({
             </Badge>
           </div>
         )}
+        
         <div
           ref={containerRef}
           className={cn(
@@ -113,18 +111,18 @@ export function VoicePreviewPanel({
           )}
         />
       </div>
-       {/* Time display */}
-       <div className="flex items-center justify-center">
+      {/* Time display */}
+      <div className="flex items-center justify-center">
         <p className="text-3xl font-semibold tabular-nums tracking-tight text-foreground">
           {formatTime(currentTime)}&nbsp;
           <span className="text-muted-foreground">
             /&nbsp;{formatTime(duration)}
           </span>
         </p>
-       </div>
+      </div>
 
       {/* Footer */}
-      <div className="flex flex-col items-center p-6">
+      <div className="flex flex-col items-center justify-center p-6">
         <div className="grid w-full grid-cols-3">
           {/* Metadata */}
           <div className="flex min-w-0 flex-col gap-0.5">
@@ -134,7 +132,7 @@ export function VoicePreviewPanel({
             {selectedVoiceName && (
               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                 <VoiceAvatar
-                  seed={selectedVoiceSeed ?? selectedVoiceName}
+                  seed={selectedVoiceId ?? selectedVoiceName}
                   name={selectedVoiceName}
                   className="shrink-0"
                 />
@@ -170,7 +168,7 @@ export function VoicePreviewPanel({
             </Button>
 
             <Button
-              variant="ghost"
+              variant="ghost" 
               size="icon-lg"
               className="flex-col"
               onClick={() => seekForward(10)}
@@ -193,7 +191,6 @@ export function VoicePreviewPanel({
               Download
             </Button>
           </div>
-
         </div>
       </div>
     </div>

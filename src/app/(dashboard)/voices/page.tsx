@@ -13,6 +13,7 @@ export default async function VoicesPage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
+  // we are using nuqs which will use to 
   const { query } = await voicesSearchParamsCache.parse(searchParams);
 
   prefetch(trpc.voices.getAll.queryOptions({ query }));
