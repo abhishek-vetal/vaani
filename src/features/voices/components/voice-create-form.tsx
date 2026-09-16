@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { useForm } from "@tanstack/react-form";
@@ -32,10 +32,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Field, FieldError } from "@/components/ui/field";
-import { 
-  Tabs, 
-  TabsList, 
-  TabsTrigger, 
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
   TabsContent
 } from "@/components/ui/tabs";
 import {
@@ -61,26 +61,60 @@ import {
 import {
   VOICE_CATEGORIES,
   VOICE_CATEGORY_LABELS,
+  type VoiceCategory,
 } from "@/features/voices/data/voice-categories";
 import { VoiceRecorder } from "./voice-recorder";
 
-const LANGUAGE_OPTIONS = locales.all
-  .filter((l) => l.tag && l.tag.includes("-") && l.name)
-  .map((l) => ({
-    value: l.tag,
-    label: l.location ? `${l.name} (${l.location})` : l.name,
-  }));
+const LANGUAGE_OPTIONS = Array.from(
+  new Map(
+    locales.all
+      .filter((l) => l.tag && l.tag.includes("-") && l.name)
+      .map((l) => {
+        const label = l.location ? `${l.name} (${l.location})` : l.name;
+        return [
+          l.tag,
+          {
+            value: l.tag,
+            label,
+            searchValue: `${label} ${l.tag} ${l.name}`,
+          },
+        ];
+      })
+  ).values()
+);
+
+const MAX_FILE_SIZE = 20 * 1024 * 1024;
 
 const voiceCreateFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
   file: z
-    .instanceof(File, { message: "An audio file is required" })
+    .file({ message: "An audio file is required" })
+    .max(MAX_FILE_SIZE, "File size must be less than 20MB")
+    .mime([
+      "audio/mpeg",
+      "audio/wav",
+      "audio/ogg",
+      "audio/aac",
+      "audio/webm"
+    ], "Only audio files are supported")
     .nullable()
     .refine((f) => f !== null, "An audio file is required"),
-  category: z.string().min(1, "A category is required"),
+  category: z.custom<VoiceCategory>(
+    (val) => typeof val === "string" && val.length > 0,
+    "A category is required"
+  ),
   language: z.string().min(1, "A language is required"),
   description: z.string(),
 });
+
+async function parseErrorMessage(response: Response, fallback: string) {
+  try {
+    const body = await response.json();
+    return body?.error ?? fallback;
+  } catch {
+    return response.statusText || fallback;
+  }
+}
 
 function FileDropzone({
   file,
@@ -108,13 +142,12 @@ function FileDropzone({
 
   if (file) {
     return (
-      <div className="flex items-center gap-3 rounded-xl border p-4">
-
-        <div className="flex size-10 items-center justify-center rounded-lg bg-muted">
+      <div className="flex w-full items-center gap-3 rounded-xl border p-4">
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted">
           <FileAudio className="size-5 text-muted-foreground" />
         </div>
 
-        <div className="min-w-0 flex-1">
+        <div className="grid flex-1">
           <p className="truncate text-sm font-medium">{file.name}</p>
           <p className="text-xs text-muted-foreground">
             {formatFileSize(file.size)}
@@ -125,6 +158,7 @@ function FileDropzone({
           type="button"
           variant="ghost"
           size="icon-sm"
+          className="shrink-0"
           onClick={togglePlay}
         >
           {isPlaying ? (
@@ -137,6 +171,7 @@ function FileDropzone({
           type="button"
           variant="ghost"
           size="icon-sm"
+          className="shrink-0"
           onClick={() => onFileChange(null)}
         >
           <X className="size-4" />
@@ -149,7 +184,7 @@ function FileDropzone({
     <div
       {...getRootProps()}
       className={cn(
-        "flex cursor-pointer flex-col items-center justify-center gap-4 overflow-hidden rounded-2xl border px-6 py-10 transition-colors",
+        "flex cursor-pointer flex-col items-center justify-center gap-3 overflow-hidden rounded-2xl border px-6 py-6 transition-colors",
         isDragReject || isInvalid
           ? "border-destructive"
           : isDragActive
@@ -158,27 +193,27 @@ function FileDropzone({
       )}
     >
       <input {...getInputProps()} />
-      <div className="flex size-12 items-center justify-center rounded-xl bg-muted">
+      <div className="flex size-10 items-center justify-center rounded-xl bg-muted">
         <AudioLines className="size-5 text-muted-foreground" />
       </div>
 
-      <div className="flex flex-col items-center gap-1.5">
-        <p className="text-base font-semibold tracking-tight">
+      <div className="flex flex-col items-center gap-1">
+        <p className="text-sm font-semibold tracking-tight">
           Upload your audio file
         </p>
 
-        <p className="text-center text-sm text-muted-foreground">
+        <p className="text-center text-xs text-muted-foreground">
           Supports all audio formats, max size 20MB
         </p>
       </div>
 
-       <Button type="button" variant="outline" size="sm">
-          <FolderOpen className="size-3.5" />
-          Upload file
-        </Button>
+      <Button type="button" variant="outline" size="sm">
+        <FolderOpen className="size-3.5" />
+        Upload file
+      </Button>
     </div>
-  )
-};
+  );
+}
 
 function LanguageCombobox({
   value,
@@ -190,12 +225,31 @@ function LanguageCombobox({
   isInvalid?: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
 
   const selectedLabel =
     LANGUAGE_OPTIONS.find((l) => l.value === value)?.label ?? "";
 
+  const filteredLanguages = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return LANGUAGE_OPTIONS;
+    return LANGUAGE_OPTIONS.filter(
+      (l) =>
+        l.label.toLowerCase().includes(q) ||
+        l.value.toLowerCase().includes(q) ||
+        l.searchValue.toLowerCase().includes(q),
+    );
+  }, [search]);
+
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover
+      open={open}
+      onOpenChange={(isOpen) => {
+        setOpen(isOpen);
+        if (!isOpen) setSearch("");
+      }}
+      modal={true}
+    >
       <PopoverTrigger asChild>
         <Button
           type="button"
@@ -215,48 +269,65 @@ function LanguageCombobox({
           <ChevronsUpDown className="size-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-(--radix-popover-trigger-width) p-0">
-        <Command>
-          <CommandInput placeholder="Search language..." />
-          <CommandList>
-            <CommandEmpty>No language found.</CommandEmpty>
-            <CommandGroup>
-              {LANGUAGE_OPTIONS.map((lang) => (
-                <CommandItem
-                  key={lang.value}
-                  value={lang.label}
-                  onSelect={() => {
-                    onChange(lang.value);
-                    setOpen(false);
-                  }}
-                >
-                  {lang.label}
-                  <Check
-                    className={cn(
-                      "ml-auto size-4",
-                      value === lang.value ? "opacity-100" : "opacity-0",
-                    )}
-                  />
-                </CommandItem>
-              ))}
-            </CommandGroup>
+      <PopoverContent
+        align="start"
+        side="bottom"
+        sideOffset={4}
+        className="w-(--radix-popover-trigger-width) p-0"
+        onWheel={(e) => e.stopPropagation()}
+      >
+        <Command shouldFilter={false} className="flex max-h-64 flex-col">
+          <CommandInput
+            placeholder="Search language..."
+            value={search}
+            onValueChange={setSearch}
+            autoFocus
+          />
+          <CommandList className="max-h-52 overflow-y-auto overscroll-contain">
+            {filteredLanguages.length === 0 ? (
+              <CommandEmpty>No language found.</CommandEmpty>
+            ) : (
+              <CommandGroup>
+                {filteredLanguages.map((lang) => (
+                  <CommandItem
+                    key={lang.value}
+                    value={lang.value}
+                    onSelect={() => {
+                      onChange(lang.value);
+                      setOpen(false);
+                      setSearch("");
+                    }}
+                  >
+                    <span className="truncate">{lang.label}</span>
+                    <Check
+                      className={cn(
+                        "ml-auto size-4",
+                        value === lang.value ? "opacity-100" : "opacity-0",
+                      )}
+                    />
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
           </CommandList>
         </Command>
       </PopoverContent>
     </Popover>
   );
-};
+}
 
 interface VoiceCreateFormProps {
   scrollable?: boolean;
   footer?: (submit: React.ReactNode) => React.ReactNode;
   onError?: (message: string) => void;
-};
+  onSuccess?: () => void;
+}
 
 export function VoiceCreateForm({
   scrollable,
   footer,
   onError,
+  onSuccess,
 }: VoiceCreateFormProps) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -271,7 +342,7 @@ export function VoiceCreateForm({
     }: {
       name: string;
       file: File;
-      category: string;
+      category: VoiceCategory;
       language: string;
       description?: string;
     }) => {
@@ -284,16 +355,14 @@ export function VoiceCreateForm({
         params.set("description", description);
       }
 
-      const response = 
-        await fetch(`/api/voices/create?${params.toString()}`, {
-          method: "POST",
-          headers: { "Content-Type": file.type },
-          body: file,
-        });
+      const response = await fetch(`/api/voices/create?${params.toString()}`, {
+        method: "POST",
+        headers: { "Content-Type": file.type || "application/octet-stream" },
+        body: file,
+      });
 
       if (!response.ok) {
-        const body = await response.json();
-        throw new Error(body.error ?? "Failed to create voice");
+        throw new Error(await parseErrorMessage(response, "Failed to create voice"));
       }
 
       return response.json();
@@ -304,7 +373,7 @@ export function VoiceCreateForm({
     defaultValues: {
       name: "",
       file: null as File | null,
-      category: "GENERAL" as string,
+      category: "GENERAL" as VoiceCategory,
       language: "en-US",
       description: "",
     },
@@ -313,23 +382,32 @@ export function VoiceCreateForm({
     },
     onSubmit: async ({ value }) => {
       try {
-         await createMutation.mutateAsync({
+        await createMutation.mutateAsync({
           name: value.name,
           file: value.file!,
           category: value.category,
           language: value.language,
-          description: value.description || undefined,
-         });
+          description: value.description.trim() || undefined,
+        });
 
-         toast.success("Voice created successfully!");
-         queryClient.invalidateQueries({
+        toast.success("Voice created successfully!");
+        queryClient.invalidateQueries({
           queryKey: trpc.voices.getAll.queryKey(),
         });
+        queryClient.invalidateQueries({
+          queryKey: trpc.billing.getStatus.queryKey(),
+        });
+        setTimeout(() => {
+          queryClient.invalidateQueries({
+            queryKey: trpc.billing.getStatus.queryKey(),
+          });
+        }, 1500);
         form.reset();
+        onSuccess?.();
       } catch (error) {
         const message =
           error instanceof Error ? error.message : "Failed to create voice";
-        
+
         if (onError) {
           onError(message);
         } else {
@@ -346,15 +424,15 @@ export function VoiceCreateForm({
         form.handleSubmit();
       }}
       className={cn(
-        "flex flex-col", 
-        scrollable ? "min-h-0 flex-1" : "gap-6"
+        "flex flex-col",
+        scrollable ? "min-h-0 flex-1" : "gap-4"
       )}
     >
       <div
         className={cn(
           scrollable
-            ? "no-scrollbar flex flex-col gap-6 overflow-y-auto px-4"
-            : "flex flex-col gap-6",
+            ? "no-scrollbar flex flex-col gap-4 overflow-y-auto px-4"
+            : "flex flex-col gap-4",
         )}
       >
         <form.Field name="file">
@@ -365,7 +443,7 @@ export function VoiceCreateForm({
             return (
               <Field data-invalid={isInvalid}>
                 <Tabs defaultValue="upload">
-                  <TabsList className="h-11! w-full">
+                  <TabsList className="h-10 w-full">
                     <TabsTrigger value="upload">
                       <Upload className="size-3.5" />
                       Upload
@@ -390,8 +468,7 @@ export function VoiceCreateForm({
                     />
                   </TabsContent>
                 </Tabs>
-                {isInvalid 
-                  && <FieldError errors={field.state.meta.errors} />}
+                {isInvalid && <FieldError errors={field.state.meta.errors} />}
               </Field>
             );
           }}
@@ -417,7 +494,6 @@ export function VoiceCreateForm({
                     onBlur={field.handleBlur}
                     className="pl-10"
                   />
-
                 </div>
                 {isInvalid && <FieldError errors={field.state.meta.errors} />}
               </Field>
@@ -432,18 +508,16 @@ export function VoiceCreateForm({
 
             return (
               <Field data-invalid={isInvalid}>
-<div className="relative flex items-center">
+                <div className="relative flex items-center">
                   <div className="pointer-events-none absolute left-0 flex h-full w-11 items-center justify-center">
                     <Layers className="size-4 text-muted-foreground" />
                   </div>
                   <Select
                     value={field.state.value}
-                    onValueChange={field.handleChange}
+                    onValueChange={(v) => field.handleChange(v as VoiceCategory)}
                   >
                     <SelectTrigger className="w-full pl-10">
-                      <SelectValue 
-                        placeholder="Select category..."
-                      />
+                      <SelectValue placeholder="Select category..." />
                     </SelectTrigger>
                     <SelectContent>
                       {VOICE_CATEGORIES.map((cat) => (
@@ -495,10 +569,9 @@ export function VoiceCreateForm({
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
                     onBlur={field.handleBlur}
-                    className="min-h-20 pl-10"
-                    rows={3}
+                    className="min-h-18 pl-10 resize-none"
+                    rows={2}
                   />
-
                 </div>
                 {isInvalid && <FieldError errors={field.state.meta.errors} />}
               </Field>
@@ -510,18 +583,18 @@ export function VoiceCreateForm({
           selector={(s) => ({
             isSubmitting: s.isSubmitting,
           })}
-      >
-        {({ isSubmitting }) => {
-          const submitButton = (
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Creating..." : "Create Voice"}
-            </Button>
-          );
+        >
+          {({ isSubmitting }) => {
+            const submitButton = (
+              <Button type="submit" disabled={isSubmitting} className="w-full">
+                {isSubmitting ? "Creating..." : "Create Voice"}
+              </Button>
+            );
 
-          return footer ? footer(submitButton) : submitButton;
-        }}
-      </form.Subscribe>
+            return footer ? footer(submitButton) : submitButton;
+          }}
+        </form.Subscribe>
       </div>
     </form>
-  )
-};
+  );
+}

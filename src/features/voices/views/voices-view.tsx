@@ -10,6 +10,7 @@ import { VoicesToolbar } from "../components/voices-toolbar";
 
 function VoicesContent() {
   const trpc = useTRPC();
+  // this reads the query from the URL
   const [query] = useQueryState(
     "query",
     voicesSearchParams.query

@@ -1,6 +1,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { VoicePreviewPlaceholder } from "@/features/text-to-speech/components/voice-preview-placeholder";
 
+// this is the loading page for text-to-speech which will show the skeletons before loading the content
 export default function Loading() {
   return (
     <div className="flex min-h-0 flex-1 overflow-hidden">

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "sonner";
+import { Toaster } from "sonner"; 
 import { ClerkProvider } from "@clerk/nextjs";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { TRPCReactProvider } from "@/trpc/client";
@@ -19,15 +19,12 @@ export const metadata: Metadata = {
   description: "AI powered Text to Speech and Voice cloning platform.",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children } : {children: React.ReactNode}) {
   return (
-    <html lang="en" className={`${inter.className} h-full antialiased`}>
-      <body className="min-h-screen">
-        <ClerkProvider>
+    // clerk provider wraps the html tag
+    <ClerkProvider>
+      <html lang="en" suppressHydrationWarning className="h-full">
+        <body className={`${inter.className} min-h-siacreen antliased`}>
           <TRPCReactProvider>
             <TooltipProvider>
               <NuqsAdapter>
@@ -36,8 +33,8 @@ export default function RootLayout({
             </TooltipProvider>
             <Toaster richColors />
           </TRPCReactProvider>
-        </ClerkProvider>
-      </body>
-    </html>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

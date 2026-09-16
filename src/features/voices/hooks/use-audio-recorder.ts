@@ -49,7 +49,7 @@ export function useAudioRecorder() {
     const ws = WaveSurfer.create({
       container: containerRef.current,
       waveColor: "hsl(var(--foreground) / 0.5)",
-      height: 144,
+      height: 100,
       barWidth: 1,
       barGap: 2,
       barRadius: 1,

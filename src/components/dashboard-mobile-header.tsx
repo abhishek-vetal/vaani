@@ -4,7 +4,8 @@ import { SidebarTrigger } from "./ui/sidebar";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
-export function PageHeader({ title, className }: { title: string, className?: string }) {
+// this will only be avaialable to the screen size != lg if classname contains the lg:hidden
+export function DashboardMobileHeader({ title, className }: { title: string, className?: string }) {
   return (
     <div
       className={cn(
@@ -18,16 +19,14 @@ export function PageHeader({ title, className }: { title: string, className?: st
       </div>
 
       <div className="flex items-center gap-3">
-        <Button variant="outline" size="sm" asChild>
-          <Link href="mailto:business@codewithantonio.com">
+        <Button variant="outline" size="sm">
+          <Link href="mailto:business@vaani.com">
             <ThumbsUp />
-            <span className="hidden lg:block">Feedback</span>
           </Link>
         </Button>
-        <Button variant="outline" size="sm" asChild>
-          <Link href="mailto:business@codewithantonio.com">
+        <Button variant="outline" size="sm">
+          <Link href="mailto:business@vaani.com">
             <Headphones />
-            <span className="hidden lg:block">Need help?</span>
           </Link>
         </Button>
       </div>

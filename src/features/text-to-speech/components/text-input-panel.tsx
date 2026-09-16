@@ -4,15 +4,18 @@ import { Textarea } from "@/components/ui/textarea"
 import { COST_PER_UNIT, TEXT_MAX_LENGTH } from "../data/constants"
 import { Coins } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+// this component gets access to the parent TTS form
 import { useTypedAppFormContext } from "@/hooks/use-app-form"
 import { ttsFormOptions } from "./text-to-speech-form"
 import { GenerateButton } from "./generate-button"
 import { PromptSuggestions } from "./prompt-suggestions"
 
 export function TextInputPanel() {
+  // gives me access to that existing parent form.
   const form = useTypedAppFormContext(ttsFormOptions)
 
   return (
+    // Reactivity - provides us the isSubmitting from the form state
     <form.Subscribe selector={(state) => state.isSubmitting}>
       {
         (isSubmitting) => (
@@ -75,20 +78,17 @@ export function TextInputPanel() {
                     ) : (
                       <div className="hidden lg:block text-sm text-muted-foreground">
                         <PromptSuggestions
-                          onSelect={(prompt) => form.setFieldValue("text", prompt)}
+                          promptFunction={(prompt) => field.handleChange(prompt)}
                         />
                       </div>
                     )
                   }
                 </div>
-
               </div>
             )}
           </form.Field>
-
         )
       }
-
     </form.Subscribe>
   )
 }

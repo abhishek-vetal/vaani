@@ -6,6 +6,7 @@ import { Headphones, ThumbsUp } from "lucide-react";
 import Link from "next/link";
 
 export function DashboardHeader() {
+  // useUser is used to access the user's data and check their authentication status
   const { isLoaded, user } = useUser()
   return (
     <div className="flex items-center justify-between ">

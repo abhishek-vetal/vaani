@@ -30,6 +30,7 @@ const t = initTRPC
 // Base router and procedure helpers
 export const createTRPCRouter = t.router;
 export const createCallerFactory = t.createCallerFactory;
+// baseProcedure is most basic procedure and anyone can call it
 export const baseProcedure = t.procedure;
 
 // Authenticated procedure - requires userId
@@ -40,6 +41,7 @@ export const authProcedure = t.procedure.use(async ({ next }) => {
     throw new TRPCError({ code: "UNAUTHORIZED"})
   }
 
+  // next() means Continue to the actual tRPC procedure
   return next({
     ctx: { userId }
   })

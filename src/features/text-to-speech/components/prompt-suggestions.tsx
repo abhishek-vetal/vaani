@@ -71,9 +71,9 @@ const PROMPT_SUGGESTIONS: {
 ];
 
 export function PromptSuggestions({
-  onSelect,
+  promptFunction,
 }: {
-  onSelect: (prompt: string) => void;
+  promptFunction: (prompt: string) => void;
 }) {
   return (
     <div className="space-y-2.5">
@@ -84,7 +84,7 @@ export function PromptSuggestions({
             key={suggestion.label}
             variant="outline"
             className="cursor-pointer gap-1.5 py-1 px-2.5 text-xs hover:bg-accent rounded-md"
-            onClick={() => onSelect(suggestion.prompt)}
+            onClick={() => promptFunction(suggestion.prompt)}
           >
             <suggestion.icon className="size-3.5 shrink-0" />
             {suggestion.label}

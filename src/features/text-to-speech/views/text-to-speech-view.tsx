@@ -18,7 +18,9 @@ export function TextToSpeechView({
 }: {
   initialValues?: Partial<TTSFormValues>;
 }) {
+  // this gives me trpc client
   const trpc = useTRPC();
+  // we use this to get the prefetch data after using the HydrateClient from the server-side code
   const { 
     data: voices,
   } = useSuspenseQuery(trpc.voices.getAll.queryOptions());
@@ -28,22 +30,24 @@ export function TextToSpeechView({
   const allVoices = [...customVoices, ...systemVoices];
   const fallbackVoiceId = allVoices[0]?.id ?? "";
 
-  // Requested voice may no longer exist (deleted); fall back to first available
+  // Requested voice may no longer exist (deleted), fall back to first available
   const resolvedVoiceId =
     initialValues?.voiceId &&
     allVoices.some((v) => v.id === initialValues.voiceId)
       ? initialValues.voiceId
       : fallbackVoiceId;
 
-  const defaultValues: TTSFormValues = {
+  const defaultValuesWithSearchParams: TTSFormValues = {
     ...defaultTTSValues,
     ...initialValues,
     voiceId: resolvedVoiceId,
   };
 
   return (
+    // React context/provider: Make these voice arrays available to the components underneath it 
+    // without passing them manually through every component
     <TTSVoicesProvider value={{ customVoices, systemVoices, allVoices }}>
-      <TextToSpeechForm defaultValues={defaultValues}>
+      <TextToSpeechForm defaultValuesFromView={defaultValuesWithSearchParams}>
         <div className="flex min-h-0 flex-1 overflow-hidden">
           <div className="flex min-h-0 flex-1 flex-col">
             <TextInputPanel />

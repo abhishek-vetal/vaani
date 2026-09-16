@@ -19,13 +19,14 @@ export const voicesRouter = createTRPCRouter({
           OR: [
             { 
               name: { 
-                contains: input.query, mode: "insensitive" as const
+                contains: input.query, 
+                mode: "insensitive" as const
               } 
             },
             {
               description: {
                 contains: input.query,
-                mode: "insensitive" as const,
+                mode: "insensitive" as const
               },
             },
           ],
@@ -91,7 +92,6 @@ export const voicesRouter = createTRPCRouter({
         await prisma.voice.delete({ where: { id: voice.id } });
 
         if (voice.r2ObjectKey) {
-          // In production, consider background jobs, retires, cron jobs etc.
           await deleteAudio(voice.r2ObjectKey).catch(() => {});
         }
 

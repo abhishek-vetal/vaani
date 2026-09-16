@@ -29,7 +29,7 @@ export function TextToSpeechDetailView({
     ],
   });
 
-  const data = generationQuery.data;
+  const generation = generationQuery.data;
   const { custom: customVoices, system: systemVoices } = voicesQuery.data;
   const allVoices = [...customVoices, ...systemVoices];
 
@@ -37,43 +37,42 @@ export function TextToSpeechDetailView({
 
   // Requested voice may no longer exist (deleted); fall back to first available
   const resolvedVoiceId =
-    data?.voiceId &&
-    allVoices.some((v) => v.id === data.voiceId)
-      ? data.voiceId
+    generation?.voiceId &&
+    allVoices.some((v) => v.id === generation.voiceId)
+      ? generation.voiceId      
       : fallbackVoiceId;
 
+  // fill the generation values inside the default values
   const defaultValues: TTSFormValues = {
-    text: data.text,
+    text: generation.text,
     voiceId: resolvedVoiceId,
-    temperature: data.temperature,
-    topP: data.topP,
-    topK: data.topK,
-    repetitionPenalty: data.repetitionPenalty,
+    temperature: generation.temperature,
+    topP: generation.topP,
+    topK: generation.topK,
+    repetitionPenalty: generation.repetitionPenalty,
   };
-
-  // Use the denormalized voiceName snapshot instead of a populated voice relation
-  // so the preview always shows the voice name at the time of generation,
-  // even if the voice was later renamed or deleted.
+  
+  // this is used to provide to the user avatar
   const generationVoice = {
-    id: data.voiceId ?? undefined,
-    name: data.voiceName,
+    id: generation.voiceId ?? undefined,
+    name: generation.voiceName,
   };
 
   return (
     <TTSVoicesProvider value={{ customVoices, systemVoices, allVoices }}>
-      <TextToSpeechForm key={generationId} defaultValues={defaultValues}>
+      <TextToSpeechForm key={generationId} defaultValuesFromView={defaultValues}>
         <div className="flex min-h-0 flex-1 overflow-hidden">
           <div className="flex min-h-0 flex-1 flex-col">
             <TextInputPanel />
             <VoicePreviewMobile
-              audioUrl={data.audioUrl}
+              audioUrl={generation.audioUrl}
               voice={generationVoice}
-              text={data.text}
+              text={generation.text}
             />
             <VoicePreviewPanel
-              audioUrl={data.audioUrl}
+              audioUrl={generation.audioUrl}
               voice={generationVoice}
-              text={data.text}
+              text={generation.text}
             />
           </div>
           <SettingsPanel />

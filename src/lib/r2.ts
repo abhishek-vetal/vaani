@@ -7,6 +7,7 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { env } from "./env";
 
+// configuring the S3 client to talk to Cloudflare R2 account
 const r2 = new S3Client({
   region: "auto",
   endpoint: `https://${env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
@@ -46,8 +47,7 @@ export async function deleteAudio(key: string): Promise<void> {
   );
 };
 
-// A presigned URL creates a temporary, secure link (e.g., valid for 1 hour) that lets a user 
-// stream or download an audio file directly from R2 without exposing your API keys.
+// presigned url for direct streaming from r2
 export async function getSignedAudioUrl(key: string): Promise<string> {
   const command = new GetObjectCommand({
     Bucket: env.R2_BUCKET_NAME,

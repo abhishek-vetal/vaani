@@ -5,12 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useCheckout } from "../hooks/use-checkout";
 import { useTRPC } from "@/trpc/client";
+import { toast } from "sonner";
 
 function formatCurrency(cents: number): string {
-  return new Intl.NumberFormat("en-US", {
+  const rupees = cents / 100;
+  const fractionDigits = rupees > 0 && rupees < 1 ? 3 : 2;
+  return new Intl.NumberFormat("en-IN", {
     style: "currency",
-    currency: "USD",
-  }).format(cents / 100);
+    currency: "INR",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: fractionDigits,
+  }).format(rupees);
 }
 
 function UpgradeCard() {
@@ -23,7 +28,7 @@ function UpgradeCard() {
           Pay as you go
         </p>
         <p className="text-xs text-muted-foreground mt-1">
-          Generate speech starting at $0.30 per 1,000 characters
+          Generate speech starting at ₹0.002 per character
         </p>
       </div>
       <Button
@@ -60,6 +65,9 @@ function UsageCard({
     portalMutation.mutate(undefined, {
       onSuccess: (data) => {
         window.open(data.portalUrl, "_blank");
+      },
+      onError: (error) => {
+        toast.error(error.message || "Failed to open customer portal");
       },
     });
   }, [portalMutation]);

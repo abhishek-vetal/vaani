@@ -40,6 +40,7 @@ export function SettingsPanelSettings() {
                           </span>
                         </div>
 
+                        {/* slider get the value in the form of array */}
                         <Slider
                           value={[field.state.value]}
                           onValueChange={(value) => field.handleChange(value[0])}

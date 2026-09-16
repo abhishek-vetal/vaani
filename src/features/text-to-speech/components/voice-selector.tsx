@@ -29,12 +29,14 @@ export function VoiceSelector() {
       ? {
         id: voiceId,
         name: "Unavailable voice",
-        category: null as null,
+        category: null
       }
       : voices[0];
 
   
   return (
+    // Field is simply a wrapper from shadcnUI component system 
+    // It groups the label + input control together
     <Field>
       <FieldLabel>Voice Style</FieldLabel>
       <Select 
@@ -42,6 +44,7 @@ export function VoiceSelector() {
         onValueChange={(v) => form.setFieldValue("voiceId", v)}
         disabled={isSubmitting}
       >
+        {/* this selected trigger shows the currently selected voiceId */}
         <SelectTrigger className="w-full h-auto gap-1 rounded-lg bg-white px-2 py-1">
           <SelectValue>
             {currentVoice && (
@@ -62,6 +65,8 @@ export function VoiceSelector() {
         </SelectTrigger>
 
         <SelectContent>
+
+          {/* This makes the invalid/deleted selection visible */}
           {hasMissingSelectedVoice && currentVoice && (
             <>
               <SelectGroup>
@@ -97,6 +102,7 @@ export function VoiceSelector() {
               ))}
             </SelectGroup>
           )}
+          
           {customVoices.length > 0 && systemVoices.length > 0 && (
             <SelectSeparator />
           )}

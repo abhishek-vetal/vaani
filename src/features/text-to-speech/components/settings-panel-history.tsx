@@ -46,9 +46,9 @@ export function SettingsPanelHistory() {
     <div className="flex flex-col gap-1 p-2">
       {generations.map((generation) => (
         <Link
-          href={`/text-to-speech/${generation.id}`}
           key={generation.id}
-          className="flex items-center gap-3 rounded-lg p-3 text-left transition-colors hover:bg-muted"
+          href={`/text-to-speech/${generation.id}`}
+          className="flex items-center gap-3 rounded-xl p-3 text-left transition-colors hover:bg-muted"
         >
           <div className="flex min-w-0 flex-1 flex-col gap-0.5">
             <p className="truncate text-sm font-medium text-foreground">
@@ -66,7 +66,7 @@ export function SettingsPanelHistory() {
                 {formatDistanceToNow(
                   new Date(generation.createdAt),
                   {
-                    addSuffix: true,
+                    addSuffix: true
                   },
                 )}
               </span>

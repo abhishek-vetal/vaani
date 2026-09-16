@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 
+// this button we are using with text-to-speech text input panel
 export function GenerateButton({
   size, 
   disabled, 
