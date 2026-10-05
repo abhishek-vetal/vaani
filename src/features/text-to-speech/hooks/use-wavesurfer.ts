@@ -41,9 +41,9 @@ export function useWaveSurfer({
 
     const ws = WaveSurfer.create({
       container: containerRef.current,
-      waveColor: "#96999D",
-      progressColor: "#4A8A9A",
-      cursorColor: "#4A8A9A",
+      waveColor: "#cbd5e1",
+      progressColor: "#0f172a",
+      cursorColor: "#0f172a",
       cursorWidth: 2,
       barWidth: 2,
       barGap: 2,

@@ -18,6 +18,7 @@ const ttsFormSchema = z.object({
   topP: z.number(),
   topK: z.number(),
   repetitionPenalty: z.number(),
+  exaggeration: z.number(),
 });
 
 // we tell zod take the schema and generate the TypeScript type from it
@@ -31,6 +32,7 @@ export const defaultTTSValues: TTSFormValues = {
   topP: 0.95,
   topK: 1000,
   repetitionPenalty: 1.2,
+  exaggeration: 1.0,
 };
 
 // these are the defualt values for my TTS form which I will use in the child components
@@ -77,6 +79,7 @@ export function TextToSpeechForm({
           topP: value.topP,
           topK: value.topK,
           repetitionPenalty: value.repetitionPenalty,
+          exaggeration: value.exaggeration,
         });
 
         toast.success("Audio generated successfully!");

@@ -18,7 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { UsageContainer } from "@/features/billing/components/usage-container";
 import { VoiceCreateDialog } from "@/features/voices/components/voice-create-dialog";
 import { OrganizationSwitcher, useClerk, UserButton } from "@clerk/nextjs";
-import { Home, LayoutGrid, AudioLines, Volume2, LucideIcon, Headphones, Settings } from "lucide-react";
+import { Home, LayoutGrid, AudioLines, Volume2, LucideIcon, Headphones, Settings, LogOut } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -91,7 +91,7 @@ export function DashboardSidebar() {
   const mainMenuItems: MenuItem[] = [
     {
       title: "Dashboard",
-      url: "/",
+      url: "/dashboard",
       icon: Home,
     },
     {
@@ -121,6 +121,11 @@ export function DashboardSidebar() {
       title: "Help and support",
       url: "mailto:business@vaani.com",
       icon: Headphones,
+    },
+    {
+      title: "Sign out",
+      icon: LogOut,
+      onClick: () => clerk.signOut({ redirectUrl: "/" }),
     },
   ];
 

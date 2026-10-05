@@ -65,9 +65,10 @@ model Generation {
   voiceName         String
   r2ObjectKey       String?
   temperature       Float
-  topP              Float
-  topK              Int
-  repetitionPenalty Float
+  topP              Float @default(0.95)
+  topK              Int   @default(1000)
+  repetitionPenalty Float @default(1.2)
+  exaggeration      Float @default(1.0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

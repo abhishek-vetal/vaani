@@ -28,7 +28,7 @@ export function TextInputPanel() {
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
                     maxLength={TEXT_MAX_LENGTH}
-                    className="absolute inset-0 resize-none border-0 p-4 pb-6 lg:p-6 lg:pb-8 text-base! leading-6 tracking-tight shadow-none wrap-break-word focus-visible:ring-0"
+                    className="absolute inset-0 resize-none border-0 p-4 pb-6 lg:p-6 lg:pb-8 text-lg! leading-relaxed tracking-normal shadow-none wrap-break-word focus-visible:ring-0 text-slate-900 placeholder:text-slate-400"
                     disabled={isSubmitting}
                   />
                   {/* Bottom fade overlay */}
@@ -47,36 +47,34 @@ export function TextInputPanel() {
                   {/* Desktop layout */}
                   {
                     field.state.value.length > 0 ? (
-                      <div className="hidden lg:flex items-center justify-between">
-                        <Badge
-                          variant="outline"
-                          className="flex gap-2 bg-white/30"
-                        >
-                          <Coins className="text-chart-5" />
+                      <div className="hidden lg:flex items-center justify-between border-t border-slate-100 pt-3">
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                            <Coins className="size-3.5 text-indigo-400/80" />
+                            <span>
+                              <span className="tabular-nums font-semibold text-slate-900">
+                                ₹{(field.state.value.length * COST_PER_UNIT).toFixed(4)}
+                              </span>{" "}
+                              estimated
+                            </span>
+                          </div>
 
-                          <span className="text-xs">
-                            <span className="tabular-nums font-medium">
-                              ₹{(field.state.value.length * COST_PER_UNIT).toFixed(4)}
-                            </span>{" "}
-                            estimated
-                          </span>
-                        </Badge>
+                          <div className="h-3 w-px bg-slate-200" />
 
-
-                        <div className="flex gap-3 items-center">
-                          <span className="text-xs text-muted-foreground tabular-nums">
+                          <span className="text-xs text-slate-400 tabular-nums font-medium">
                             {field.state.value.length.toLocaleString()} / {TEXT_MAX_LENGTH.toLocaleString()} characters
                           </span>
-                          <GenerateButton
-                            size="sm"
-                            disabled={isSubmitting}
-                            isSubmitting={isSubmitting}
-                            onSubmit={() => form.handleSubmit()}
-                          />
                         </div>
+
+                        <GenerateButton
+                          size="sm"
+                          disabled={isSubmitting}
+                          isSubmitting={isSubmitting}
+                          onSubmit={() => form.handleSubmit()}
+                        />
                       </div>
                     ) : (
-                      <div className="hidden lg:block text-sm text-muted-foreground">
+                      <div className="hidden lg:block text-sm text-muted-foreground border-t border-slate-100 pt-3">
                         <PromptSuggestions
                           promptFunction={(prompt) => field.handleChange(prompt)}
                         />

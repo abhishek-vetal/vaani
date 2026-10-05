@@ -4,7 +4,7 @@ import { env } from "@/lib/env";
 import { TRPCError } from "@trpc/server";
 import { chatterbox } from "@/lib/chatterbox-client";
 import prisma from "@/lib/db";
-import { uploadAudio } from "@/lib/r2";
+import { uploadAudio, deleteAudio } from "@/lib/r2";
 import { TEXT_MAX_LENGTH } from "@/features/text-to-speech/data/constants";
 import { createTRPCRouter, orgProcedure } from "../init";
 
@@ -16,7 +16,7 @@ export const generationsRouter = createTRPCRouter({
     }))
     // we use query since we are reading the data
     .query(async ({ input, ctx }) => {
-      const generation = await prisma.generation.findUnique({
+      const generation = await prisma.generation.findFirst({
         where: { id: input.id, orgId: ctx.orgId },
         // we are not going to send orgId, r2ObjectKey since this is not required to user
         // we hide the r2ObjectKey since its a internal storage detail
@@ -55,6 +55,38 @@ export const generationsRouter = createTRPCRouter({
       return generations;
     }),
 
+  delete: orgProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const generation = await prisma.generation.findFirst({
+        where: {
+          id: input.id,
+          orgId: ctx.orgId,
+        },
+        select: {
+          id: true,
+          r2ObjectKey: true,
+        },
+      });
+
+      if (!generation) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Generation not found",
+        });
+      }
+
+      await prisma.generation.delete({
+        where: { id: generation.id },
+      });
+
+      if (generation.r2ObjectKey) {
+        await deleteAudio(generation.r2ObjectKey).catch(() => {});
+      }
+
+      return { success: true };
+    }),
+
   // zod validation 
   //  Frontend validation
   // → better UX
@@ -70,6 +102,7 @@ export const generationsRouter = createTRPCRouter({
         topP: z.number().min(0).max(1).default(0.95),
         topK: z.number().min(1).max(10000).default(1000),
         repetitionPenalty: z.number().min(1).max(2).default(1.2),
+        exaggeration: z.number().min(0.25).max(2).default(1.0),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -127,6 +160,7 @@ export const generationsRouter = createTRPCRouter({
         });
       }
 
+      // @ts-ignore: mapping the UI parameters to what the current Modal backend actually expects
       const { data, error } = await chatterbox.POST("/generate", {
         body: {
           prompt: input.text,
@@ -135,8 +169,9 @@ export const generationsRouter = createTRPCRouter({
           top_p: input.topP,
           top_k: input.topK,
           repetition_penalty: input.repetitionPenalty,
+          exaggeration: input.exaggeration,
           norm_loudness: true,
-        },
+        } as any,
         // treat the response as binary data rather than normal JSON
         parseAs: "arrayBuffer",
       });
@@ -171,6 +206,7 @@ export const generationsRouter = createTRPCRouter({
             topP: input.topP,
             topK: input.topK,
             repetitionPenalty: input.repetitionPenalty,
+            exaggeration: input.exaggeration,
           },
           select: {
             id: true,

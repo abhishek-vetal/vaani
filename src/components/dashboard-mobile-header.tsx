@@ -9,27 +9,27 @@ export function DashboardMobileHeader({ title, className }: { title: string, cla
   return (
     <div
       className={cn(
-        "flex items-center justify-between border-b px-4 py-4",
+        "lg:hidden sticky top-0 z-30 flex items-center justify-between border-b border-slate-100 bg-white/90 backdrop-blur-md px-4 py-3 shrink-0",
         className,
       )}
     >
-      <div className="flex items-center gap-2">
-        <SidebarTrigger />
-        <h1 className="text-lg font-semibold tracking-tight">{title}</h1>
+      <div className="flex items-center gap-2.5">
+        <SidebarTrigger className="text-slate-600 hover:text-slate-900" />
+        <h1 className="text-base font-bold tracking-tight text-slate-900">{title}</h1>
       </div>
 
-      <div className="flex items-center gap-3">
-        <Button variant="outline" size="sm">
-          <Link href="mailto:business@vaani.com">
-            <ThumbsUp />
+      <div className="flex items-center gap-1.5">
+        <Button variant="ghost" size="icon-sm" className="rounded-full text-slate-500 hover:text-slate-900 size-8" asChild>
+          <Link href="mailto:business@vaani.com" aria-label="Feedback">
+            <ThumbsUp className="size-4" />
           </Link>
         </Button>
-        <Button variant="outline" size="sm">
-          <Link href="mailto:business@vaani.com">
-            <Headphones />
+        <Button variant="ghost" size="icon-sm" className="rounded-full text-slate-500 hover:text-slate-900 size-8" asChild>
+          <Link href="mailto:business@vaani.com" aria-label="Help & Support">
+            <Headphones className="size-4" />
           </Link>
         </Button>
       </div>
     </div>
-  )
+  );
 }

@@ -100,20 +100,19 @@ export function VoicePreviewMobile({
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={handleDownload}>
+          <Button variant="ghost" size="icon" onClick={handleDownload} className="text-slate-500 hover:text-slate-900 size-9 rounded-full">
             <Download className="size-4" />
           </Button>
 
           <Button
-            variant="default"
             size="icon"
-            className="rounded-full"
+            className="rounded-full size-10 bg-slate-900 hover:bg-slate-800 text-white shadow-sm transition-all active:scale-95"
             onClick={togglePlayPause}
           >
             {isPlaying ? (
-              <Pause className="fill-background" />
+              <Pause className="size-4 fill-current" />
             ) : (
-              <Play className="fill-background" />
+              <Play className="size-4 fill-current ml-0.5" />
             )}
           </Button>
         </div>

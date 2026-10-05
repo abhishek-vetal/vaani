@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner"; 
 import { ClerkProvider } from "@clerk/nextjs";
@@ -7,7 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { TRPCReactProvider } from "@/trpc/client";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 
-const inter = Inter({
+const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
 });
 
@@ -24,7 +24,7 @@ export default function RootLayout({ children } : {children: React.ReactNode}) {
     // clerk provider wraps the html tag
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning className="h-full">
-        <body className={`${inter.className} min-h-siacreen antliased`}>
+        <body className={`${jakarta.className} min-h-screen antialiased selection:bg-indigo-100 selection:text-indigo-900`}>
           <TRPCReactProvider>
             <TooltipProvider>
               <NuqsAdapter>

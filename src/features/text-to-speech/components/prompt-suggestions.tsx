@@ -76,19 +76,21 @@ export function PromptSuggestions({
   promptFunction: (prompt: string) => void;
 }) {
   return (
-    <div className="space-y-2.5">
-      <p className="text-sm text-muted-foreground">Get started with</p>
-      <div className="flex flex-wrap gap-2">
+    <div className="space-y-2">
+      <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
+        Suggestions
+      </p>
+      <div className="flex flex-wrap gap-1.5">
         {PROMPT_SUGGESTIONS.map((suggestion) => (
-          <Badge
+          <button
             key={suggestion.label}
-            variant="outline"
-            className="cursor-pointer gap-1.5 py-1 px-2.5 text-xs hover:bg-accent rounded-md"
+            type="button"
+            className="group inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 shadow-2xs hover:border-slate-900 hover:text-slate-900 hover:bg-slate-50 transition-all active:scale-95 cursor-pointer"
             onClick={() => promptFunction(suggestion.prompt)}
           >
-            <suggestion.icon className="size-3.5 shrink-0" />
-            {suggestion.label}
-          </Badge>
+            <suggestion.icon className="size-3 text-slate-400 group-hover:text-slate-900 transition-colors shrink-0" />
+            <span>{suggestion.label}</span>
+          </button>
         ))}
       </div>
     </div>

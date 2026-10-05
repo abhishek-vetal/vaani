@@ -50,6 +50,7 @@ export function TextToSpeechDetailView({
     topP: generation.topP,
     topK: generation.topK,
     repetitionPenalty: generation.repetitionPenalty,
+    exaggeration: generation.exaggeration,
   };
   
   // this is used to provide to the user avatar

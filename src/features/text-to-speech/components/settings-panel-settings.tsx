@@ -17,21 +17,31 @@ export function SettingsPanelSettings() {
         (isSubmitting) => (
           <>
             {/* Voice Style Dropdown Section */}
-            <div className="border-b border-dashed p-4">
+            <div className="border-b border-slate-100 p-4 lg:p-5">
               <div className="text-muted-foreground">
                 <VoiceSelector />
               </div>
             </div>
 
             {/* Voice Adjustments Section */}
-            <div className="p-4 flex-1">
+            <div className="p-4 lg:p-5 flex-1">
               <FieldGroup>
                 {sliders.map((slider) => (
                   <form.Field key={slider.id} name={slider.id}>
                     {(field) => (
                       <Field>
-                        <FieldLabel>{slider.label}</FieldLabel>
                         <div className="flex items-center justify-between">
+                          <FieldLabel className="text-xs font-bold text-slate-900 tracking-tight">{slider.label}</FieldLabel>
+                          <span className="text-[11px] font-mono font-semibold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full">
+                            {field.state.value}
+                          </span>
+                        </div>
+                        {slider.description && (
+                          <p className="text-xs text-slate-400 mt-0.5 mb-2 leading-relaxed">
+                            {slider.description}
+                          </p>
+                        )}
+                        <div className="flex items-center justify-between mt-2">
                           <span className="text-xs text-muted-foreground">
                             {slider.leftLabel}
                           </span>

@@ -3,6 +3,15 @@ import { TRPCError } from "@trpc/server";
 import { deleteAudio } from "@/lib/r2";
 import { createTRPCRouter, orgProcedure } from "../init";
 import prisma from "@/lib/db";
+import { VOICE_CATEGORY_LABELS, type VoiceCategory } from "@/features/voices/data/voice-categories";
+
+const KNOWN_REGIONS: Record<string, string[]> = {
+  US: ["united states", "usa", "america", "american", "us"],
+  IN: ["india", "indian", "in", "hindi"],
+  GB: ["united kingdom", "uk", "britain", "british", "england", "english", "gb"],
+  AU: ["australia", "australian", "au"],
+  CA: ["canada", "canadian", "ca"],
+};
 
 export const voicesRouter = createTRPCRouter({
   getAll: orgProcedure
@@ -14,24 +23,57 @@ export const voicesRouter = createTRPCRouter({
         .optional(),
     )
     .query(async ({ ctx, input }) => {
-      const searchFilter = input?.query
-        ? {
+      const q = input?.query?.trim().toLowerCase();
+
+      let searchFilter = {};
+
+      if (q) {
+        // Find any category that matches the search query
+        const matchingCategories = (Object.keys(VOICE_CATEGORY_LABELS) as VoiceCategory[]).filter((cat) => {
+          const label = VOICE_CATEGORY_LABELS[cat].toLowerCase();
+          const key = cat.toLowerCase().replace(/_/g, " ");
+          return label.includes(q) || key.includes(q) || q.includes(label) || q.includes(key);
+        });
+
+        // Find any country/region codes that match the search query
+        const matchingCountryCodes = Object.entries(KNOWN_REGIONS)
+          .filter(([code, aliases]) => {
+            return code.toLowerCase() === q || aliases.some((alias) => alias.includes(q) || q.includes(alias));
+          })
+          .map(([code]) => code);
+
+        searchFilter = {
           OR: [
             { 
               name: { 
-                contains: input.query, 
+                contains: input!.query!, 
                 mode: "insensitive" as const
               } 
             },
             {
               description: {
-                contains: input.query,
+                contains: input!.query!,
                 mode: "insensitive" as const
               },
             },
+            {
+              language: {
+                contains: input!.query!,
+                mode: "insensitive" as const
+              },
+            },
+            ...(matchingCategories.length > 0
+              ? [{ category: { in: matchingCategories } }]
+              : []),
+            ...matchingCountryCodes.map((code) => ({
+              language: {
+                contains: code,
+                mode: "insensitive" as const,
+              },
+            })),
           ],
-        }
-        : {};
+        };
+      }
 
       const [custom, system] = await Promise.all([
         prisma.voice.findMany({
