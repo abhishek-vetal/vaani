@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Mic, MoreHorizontal, Pause, Play, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { cn } from "@/lib/utils";
 
 import {
   AlertDialog,
@@ -40,20 +41,15 @@ const regionNames = new Intl.DisplayNames(["en"], { type: "region" });
 
 function parseLanguage(locale: string) {
   const [, country] = locale.split("-");
-  if (!country) return { flag: "", region: locale };
-
-  const flag = [...country.toUpperCase()]
-    .map((c) => String.fromCodePoint(0x1f1e6 + c.charCodeAt(0) - 65))
-    .join("");
+  if (!country) return { region: locale };
 
   const region = regionNames.of(country) ?? country;
-
-  return { flag, region };
+  return { region };
 };
 
 export function VoiceCard({ voice }: VoiceCardProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const { flag, region } = parseLanguage(voice.language);
+  const { region } = parseLanguage(voice.language);
 
   const audioSrc = `/api/voices/${encodeURIComponent(voice.id)}`;
   const { isPlaying, isLoading, togglePlay } = useAudioPlayback(audioSrc);
@@ -75,70 +71,75 @@ export function VoiceCard({ voice }: VoiceCardProps) {
   );
 
   return (
-    <div className="flex items-center gap-1 overflow-hidden rounded-xl border pr-3 lg:pr-6">
-      <div className="relative h-24 w-20 shrink-0 lg:h-30 lg:w-24">
-        <div className="absolute left-0 top-0 h-24 w-10 border-r bg-muted/50 lg:h-30 lg:w-12" />
+    <div className="group flex items-center justify-between gap-3 sm:gap-4 rounded-2xl border border-slate-200/80 bg-white p-3.5 sm:p-4 transition-all duration-200 hover:border-slate-300 hover:shadow-xs">
+      <div className="flex items-center gap-3 sm:gap-3.5 min-w-0 flex-1">
+        {/* Proportional circular avatar */}
+        <VoiceAvatar
+          seed={voice.id}
+          name={voice.name}
+          className="size-11 sm:size-12 shrink-0 rounded-full border border-slate-200/80 shadow-2xs"
+        />
 
-        <div className="absolute inset-0 flex items-center justify-center">
-          <VoiceAvatar
-            seed={voice.id}
-            name={voice.name}
-            className="size-14 border-[1.5px] border-white shadow-xs lg:size-18"
-          />
+        {/* Voice Details */}
+        <div className="flex min-w-0 flex-1 flex-col justify-center gap-1">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="truncate text-sm sm:text-base font-semibold text-slate-900 tracking-tight">
+              {voice.name}
+            </span>
+            <span className="text-xs text-slate-400 font-normal shrink-0">
+              · {VOICE_CATEGORY_LABELS[voice.category]}
+            </span>
+          </div>
+
+          <p className="line-clamp-1 text-xs text-slate-500 leading-relaxed">
+            {voice.description}
+          </p>
+
+          <p className="text-[11px] text-slate-400 font-medium">
+            {region}
+          </p>
         </div>
-
       </div>
 
-      <div className="flex min-w-0 flex-1 flex-col gap-1.5 lg:gap-3">
-        <div className="flex items-center gap-1.5 line-clamp-1 text-sm font-medium tracking-tight">
-          {voice.name}
-          <span className="size-1 shrink-0 rounded-full bg-muted-foreground/50" />
-          <span className="text-[#327c88]">
-            {VOICE_CATEGORY_LABELS[voice.category]}
-          </span>
-        </div>
-
-        <p className="line-clamp-1 text-xs text-muted-foreground">
-          {voice.description}
-        </p>
-
-        <p className="flex items-center gap-1 text-xs">
-          <span className="shrink-0">{flag}</span>
-          <span className="truncate font-medium">{region}</span>
-        </p>
-      </div>
-
-      <div className="ml-1 flex shrink-0 items-center gap-1 lg:ml-3 lg:gap-2">
+      {/* Actions */}
+      <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
         <Button
           variant="outline"
           size="icon-sm"
-          className="rounded-full"
+          className={cn(
+            "rounded-full transition-all size-9",
+            isPlaying
+              ? "bg-slate-900 text-white border-slate-900 hover:bg-slate-800 shadow-xs"
+              : "border-slate-200 bg-slate-50/50 text-slate-700 hover:bg-slate-900 hover:text-white hover:border-slate-900 shadow-2xs"
+          )}
           onClick={togglePlay}
           disabled={isLoading}
+          aria-label={isPlaying ? "Pause voice preview" : "Play voice preview"}
         >
           {isLoading ? (
-            <Spinner className="size-4" />
+            <Spinner className="size-3.5" />
           ) : isPlaying ? (
-            <Pause className="size-4" />
+            <Pause className="size-3.5 fill-current" />
           ) : (
-            <Play className="size-4" />
+            <Play className="size-3.5 fill-current ml-0.5" />
           )}
         </Button>
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button 
-              variant="outline" 
+              variant="ghost" 
               size="icon-sm" 
-              className="rounded-full"
+              className="rounded-full size-9 text-slate-400 hover:text-slate-900 hover:bg-slate-100"
             >
               <MoreHorizontal className="size-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem asChild>
+          <DropdownMenuContent align="end" className="rounded-xl shadow-lg border-slate-200">
+            <DropdownMenuItem asChild className="rounded-lg">
               <Link href={`/text-to-speech?voiceId=${voice.id}`}>
-                <Mic className="size-4 text-foreground" />
-                <span className="font-medium">Use this voice</span>
+                <Mic className="size-4 text-slate-700" />
+                <span className="font-semibold text-slate-800">Use this voice</span>
               </Link>
             </DropdownMenuItem>
             {voice.variant === "CUSTOM" && (

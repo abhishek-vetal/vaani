@@ -5,21 +5,28 @@ import { SettingsPanelHistory } from "@/features/text-to-speech/components/setti
 
 // right side panel of the text-to-speech UI page
 export function SettingsPanel() {
-  const tabTriggerClassName = "gap-2 bg-transparent rounded-none border-x-0 border-t-0 border-b-px border-b-transparent shadow-none data-[state=active]:border-b-foreground group-data-[variant=default]/tabs-list:data-[state=active]:shadow-none";
+  const tabTriggerClass =
+    "flex-1 flex h-7 items-center justify-center gap-1.5 rounded-lg text-xs font-medium transition-colors select-none " +
+    "data-[state=active]:bg-slate-100 data-[state=active]:text-slate-900 data-[state=active]:font-semibold data-[state=active]:shadow-none " +
+    "data-active:bg-slate-100 data-active:text-slate-900 data-active:shadow-none " +
+    "data-[state=inactive]:bg-transparent data-[state=inactive]:text-slate-400 hover:text-slate-700 " +
+    "border-none shadow-none after:hidden data-[state=active]:after:hidden";
 
   return (
-    <div className="hidden min-h-0 w-100 border-l lg:flex flex-col">
+    <div className="hidden min-h-0 w-96 border-l border-slate-200/80 bg-white lg:flex flex-col">
       <Tabs defaultValue="settings" className="flex h-full min-h-0 flex-col">
-        <TabsList className="rounded-none w-full bg-transparent border-b h-12 p-0 group-data-[orientation=horizontal]/tabs:h-12">
-          <TabsTrigger value="settings" className={tabTriggerClassName}>
-            <Settings className="size-4" />
-            Settings
-          </TabsTrigger>
-          <TabsTrigger value="history" className={tabTriggerClassName}>
-            <History className="size-4" />
-            History
-          </TabsTrigger>
-        </TabsList>
+        <div className="border-b border-slate-100 bg-white px-3 py-2">
+          <TabsList className="flex h-7 w-full items-center gap-1 bg-transparent p-0 border-none shadow-none">
+            <TabsTrigger value="settings" className={tabTriggerClass}>
+              <Settings className="size-3.5" />
+              Settings
+            </TabsTrigger>
+            <TabsTrigger value="history" className={tabTriggerClass}>
+              <History className="size-3.5" />
+              History
+            </TabsTrigger>
+          </TabsList>
+        </div>
         <TabsContent
           value="settings"
           className="mt-0 flex min-h-0 flex-1 flex-col overflow-y-auto"

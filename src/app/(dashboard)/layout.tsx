@@ -5,9 +5,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <SidebarProvider>
       <DashboardSidebar />
-      <main className="w-full">
-        {children}
-      </main >
+      <main className="relative flex-1 w-full bg-white overflow-x-hidden">
+        {/* Content */}
+        <div className="relative z-10 w-full h-full">
+          {children}
+        </div>
+      </main>
     </SidebarProvider>
   );
 }

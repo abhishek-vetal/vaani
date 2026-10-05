@@ -3,7 +3,7 @@
 * Do not edit manually. Run `npm run sync-api` to regenerate.
 *
 * Generated from: https://abhivetal8825--chatterbox-tts-chatterbox-serve.modal.run/openapi.json
-* Generated at: 2026-06-30T14:23:06.042Z
+* Generated at: 2026-10-03T08:13:48.221Z
 */
   export interface paths {
     "/generate": {

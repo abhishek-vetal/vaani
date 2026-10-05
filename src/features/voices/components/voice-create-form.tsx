@@ -586,8 +586,12 @@ export function VoiceCreateForm({
         >
           {({ isSubmitting }) => {
             const submitButton = (
-              <Button type="submit" disabled={isSubmitting} className="w-full">
-                {isSubmitting ? "Creating..." : "Create Voice"}
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full h-11 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold shadow-sm transition-all active:scale-[0.98] disabled:opacity-50"
+              >
+                {isSubmitting ? "Creating Voice..." : "Create Voice"}
               </Button>
             );
 

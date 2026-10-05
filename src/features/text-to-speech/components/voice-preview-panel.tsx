@@ -83,21 +83,21 @@ export function VoicePreviewPanel({
   };
 
   return (
-    <div className="h-full gap-8 flex-col border-t hidden flex-1 lg:flex">
+    <div className="h-full gap-8 flex-col border-t border-slate-100 bg-white hidden flex-1 lg:flex">
       {/* Header */}
       <div className="p-6 pb-0">
-        <h3 className="font-semibold text-foreground">Voice preview</h3>
+        <h3 className="font-bold text-sm text-slate-900 uppercase tracking-wider">Voice Preview</h3>
       </div>
 
       {/* Content */}
-      <div className="relative flex flex-1 items-center justify-center">
+      <div className="relative flex flex-1 items-center justify-center px-8">
         {!isReady && (
           <div className="absolute inset-0 z-10 flex items-center justify-center">
             <Badge
               variant="outline"
-              className="gap-2 bg-background/90 px-3 py-1.5 text-sm text-muted-foreground shadow-sm"
+              className="gap-2 bg-white/90 px-3 py-1.5 text-xs text-slate-500 shadow-sm border-slate-200"
             >
-              <Spinner className="size-4" />
+              <Spinner className="size-3.5" />
               <span>Loading audio...</span>
             </Badge>
           </div>
@@ -113,28 +113,28 @@ export function VoicePreviewPanel({
       </div>
       {/* Time display */}
       <div className="flex items-center justify-center">
-        <p className="text-3xl font-semibold tabular-nums tracking-tight text-foreground">
+        <p className="text-3xl font-bold tabular-nums tracking-tight text-slate-900">
           {formatTime(currentTime)}&nbsp;
-          <span className="text-muted-foreground">
+          <span className="text-slate-400 font-medium">
             /&nbsp;{formatTime(duration)}
           </span>
         </p>
       </div>
 
       {/* Footer */}
-      <div className="flex flex-col items-center justify-center p-6">
-        <div className="grid w-full grid-cols-3">
+      <div className="flex flex-col items-center justify-center p-6 border-t border-slate-50">
+        <div className="grid w-full grid-cols-3 items-center">
           {/* Metadata */}
           <div className="flex min-w-0 flex-col gap-0.5">
-            <p className="truncate text-sm font-medium text-foreground">
+            <p className="truncate text-sm font-semibold text-slate-900">
               {text}
             </p>
             {selectedVoiceName && (
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <div className="flex items-center gap-1.5 text-xs text-slate-500">
                 <VoiceAvatar
                   seed={selectedVoiceId ?? selectedVoiceName}
                   name={selectedVoiceName}
-                  className="shrink-0"
+                  className="size-4 shrink-0 rounded-full"
                 />
                 <span className="truncate">{selectedVoiceName}</span>
               </div>
@@ -146,33 +146,35 @@ export function VoicePreviewPanel({
             <Button
               variant="ghost"
               size="icon-lg"
-              className="flex-col"
+              className="flex-col text-slate-400 hover:text-slate-900 size-9"
               onClick={() => seekBackward(10)}
               disabled={!isReady}
+              aria-label="Seek backward 10s"
             >
               <Undo className="size-4 -mb-1" />
               <span className="text-[10px] font-medium">10</span>
             </Button>
 
             <Button
-              variant="default"
               size="icon-lg"
-              className="rounded-full"
+              className="rounded-full size-12 bg-slate-900 hover:bg-slate-800 text-white shadow-sm transition-all active:scale-95"
               onClick={togglePlayPause}
+              aria-label={isPlaying ? "Pause" : "Play"}
             >
               {isPlaying ? (
-                <Pause className="fill-background" />
+                <Pause className="size-5 fill-current" />
               ) : (
-                <Play className="fill-background" />
+                <Play className="size-5 fill-current ml-0.5" />
               )}
             </Button>
 
             <Button
               variant="ghost" 
               size="icon-lg"
-              className="flex-col"
+              className="flex-col text-slate-400 hover:text-slate-900 size-9"
               onClick={() => seekForward(10)}
               disabled={!isReady}
+              aria-label="Seek forward 10s"
             >
               <Redo className="size-4 -mb-1" />
               <span className="text-[10px] font-medium">10</span>
@@ -184,10 +186,11 @@ export function VoicePreviewPanel({
             <Button
               variant="outline"
               size="sm"
+              className="h-9 px-4 rounded-xl border-slate-200 text-slate-700 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-colors shadow-2xs font-semibold"
               onClick={handleDownload}
               disabled={isDownloading}
             >
-              <Download className="size-4" />
+              <Download className="size-3.5 mr-1.5" />
               Download
             </Button>
           </div>

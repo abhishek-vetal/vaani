@@ -1,12 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { AudioLines } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-// this button we are using with text-to-speech text input panel
 export function GenerateButton({
   size, 
   disabled, 
   isSubmitting, 
-  onSubmit,
+  onSubmit, 
   className,
 }: {
   size?: "default" | "sm",
@@ -20,19 +21,24 @@ export function GenerateButton({
       size={size}
       disabled={disabled}
       onClick={onSubmit}
-      className={className}
+      className={cn(
+        "rounded-xl font-semibold bg-slate-900 hover:bg-slate-800 text-white shadow-sm transition-all active:scale-[0.98] disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none disabled:border disabled:border-slate-200",
+        size === "sm" ? "h-9 px-4 text-xs" : "h-11 px-6 text-sm",
+        className
+      )}
       type="button"
     >
-      {
-        isSubmitting ? (
-          <>
-            <Spinner className="size-3" />
-            ...Generating
-          </>
-        ) : (
-          "Generate Speech"
-        )
-      }
+      {isSubmitting ? (
+        <span className="flex items-center gap-2">
+          <Spinner className="size-3.5" />
+          <span>Generating...</span>
+        </span>
+      ) : (
+        <span className="flex items-center gap-2">
+          <AudioLines className="size-3.5 opacity-70" />
+          <span>Generate Speech</span>
+        </span>
+      )}
     </Button>
-  )
+  );
 }

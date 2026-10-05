@@ -7,7 +7,7 @@ import {
   TEXT_MAX_LENGTH,
   COST_PER_UNIT,
 } from "@/features/text-to-speech/data/constants"
-import { Coins } from "lucide-react"
+import { Coins, AudioLines } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
@@ -27,95 +27,73 @@ export function TextInputPanel() {
   }
 
   return (
-    <div
-      className="rounded-[28px] bg-linear-to-br from-cyan-400 via-fuchsia-300 to-cyan-100
-      p-px shadow-md
-    "
-    >
-      <div
-        className="
-        rounded-[27px]
-        bg-background/90
-        backdrop-blur-xl
-      "
-      >
+    <div className="relative rounded-3xl border border-slate-200 bg-white shadow-sm transition-all focus-within:border-indigo-300 focus-within:ring-[3px] focus-within:ring-indigo-500/10 focus-within:shadow-md overflow-hidden">
+      <div className="flex flex-col p-2">
         {/* Input Area */}
-        <div
-          className="rounded-t-[27px] bg-card p-5" 
-        >
-          <Textarea
-            placeholder="Start typing or paste your text here..."
-            maxLength={TEXT_MAX_LENGTH}
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            className="
-              h-41
-              resize-none
-              overflow-y-auto
-              border-0
-              bg-transparent
-              p-1
-              text-base
-              leading-7
-              shadow-none
-              placeholder:text-muted-foreground/70
-              focus-visible:ring-0
-              wrap-anywhere
-            "
-          />
+        <Textarea
+          placeholder="Start typing or paste your text here..."
+          maxLength={TEXT_MAX_LENGTH}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          className="
+            min-h-[160px]
+            resize-none
+            border-0
+            bg-transparent
+            p-4
+            text-lg
+            leading-relaxed
+            shadow-none
+            text-slate-900
+            placeholder:text-slate-400
+            focus-visible:ring-0
+            wrap-anywhere
+          "
+        />
 
-          {/* Bottom Info */}
-          <div className="mt-5 flex items-center justify-between">
-            <Badge
-              variant="outline"
-              className="flex gap-2 bg-white/30"
-            >
-              <Coins className="text-chart-5" />
-
-              <span className="text-xs">
-                {text.length === 0 ? (
-                  "Start typing to estimate"
-                ) : (
-                  <>
-                    <span className="tabular-nums font-medium">
-                      ₹{(text.length * COST_PER_UNIT).toFixed(3)}
-                    </span>{" "}
-                    estimated
-                  </>
-                )}
-              </span>
-            </Badge>
-
-            <span className="text-xs text-muted-foreground tabular-nums">
-              {text.length.toLocaleString()} / {TEXT_MAX_LENGTH.toLocaleString()} characters
+        {/* Unified Bottom Control Bar */}
+        <div className="mt-1 flex flex-col sm:flex-row items-center justify-between gap-4 p-2 rounded-2xl bg-slate-50/80 border border-slate-100/50">
+          
+          {/* Info Section */}
+          <div className="flex items-center gap-4 px-3">
+            <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+              <Coins className="size-3.5 text-indigo-400/80" />
+              {text.length === 0 ? (
+                <span>Start typing to estimate</span>
+              ) : (
+                <span>
+                  <span className="text-slate-900 font-semibold">
+                    ₹{(text.length * COST_PER_UNIT).toFixed(3)}
+                  </span>{" "}
+                  estimated
+                </span>
+              )}
+            </div>
+            
+            <div className="h-3 w-px bg-slate-200" />
+            
+            <span className="text-xs font-medium text-slate-400 tabular-nums">
+              {text.length.toLocaleString()} / {TEXT_MAX_LENGTH.toLocaleString()}
             </span>
           </div>
-        </div>
 
-        {/* Action Bar */}
-        <div
-          className="
-          flex
-          items-center
-          justify-end
-          border-t
-          px-5
-          py-3
-        "
-        >
+          {/* Action Button */}
           <Button
             size="sm"
             disabled={!text.trim()}
             className="
-              h-10
-              rounded-xl
-              px-5
-              font-medium
-              w-full
-              lg:w-auto
+              group
+              h-10 rounded-xl px-6 font-semibold w-full sm:w-auto
+              bg-slate-900 text-white
+              shadow-[0_1px_2px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.15)]
+              hover:bg-slate-800
+              transition-all
+              active:scale-[0.98]
+              disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none disabled:border disabled:border-slate-200 disabled:transform-none
             "
             onClick={handleGenerate}
           >
+            <AudioLines className="mr-2 size-4 opacity-70 transition-opacity group-hover:opacity-100" />
             Generate speech
           </Button>
         </div>

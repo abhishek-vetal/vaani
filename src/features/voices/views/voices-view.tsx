@@ -19,19 +19,24 @@ function VoicesContent() {
     trpc.voices.getAll.queryOptions({ query })
   );
 
+  const hasCustom = data.custom.length > 0;
+
   return (
     <>
-      <VoicesList title="Team Voices" voices={data.custom} />
+      {hasCustom && <VoicesList title="Custom Voices" voices={data.custom} />}
       <VoicesList title="Built-in Voices" voices={data.system} />
+      {!hasCustom && <VoicesList title="Custom Voices" voices={data.custom} />}
     </>
   );
 };
 
 export function VoicesView() {
   return (
-    <div className="flex-1 space-y-10 overflow-y-auto p-3 lg:p-6">
+    <div className="flex-1 space-y-6 sm:space-y-8 overflow-y-auto px-4 py-6 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
       <VoicesToolbar />
-      <VoicesContent />
+      <div className="space-y-6 sm:space-y-8">
+        <VoicesContent />
+      </div>
     </div>
   );
 };
