@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQueryState } from "nuqs";
 import { useDebouncedCallback } from "use-debounce";
 import { CirclePlus, Search, X } from "lucide-react";
@@ -20,11 +20,12 @@ export function VoicesToolbar() {
   );  
 
   const [localQuery, setLocalQuery] = useState(query);
+  const [prevQuery, setPrevQuery] = useState(query);
 
-  // Sync local query if URL query changes externally
-  useEffect(() => {
+  if (prevQuery !== query) {
+    setPrevQuery(query);
     setLocalQuery(query);
-  }, [query]);
+  }
 
   const debouncedSetQuery = useDebouncedCallback(
     (value: string) => setQuery(value || null),

@@ -1,5 +1,3 @@
-import Link from "next/link";
-import { Play, Sparkles, Code, AudioWaveform, Zap } from "lucide-react";
 import { HeroTerminal } from "./_components/hero-terminal";
 import { AudioShowcase } from "./_components/audio-showcase";
 

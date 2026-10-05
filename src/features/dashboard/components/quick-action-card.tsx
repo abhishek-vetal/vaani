@@ -1,7 +1,5 @@
 import { QuickAction } from "@/features/dashboard/data/quick-actions";
-import { ArrowRight, PlayCircle, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 
 export function QuickActionCard({
   title,

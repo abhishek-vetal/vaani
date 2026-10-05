@@ -10,9 +10,7 @@ import {
   Podcast,
   Brain,
 } from "lucide-react";
-
-import { Badge } from "@/components/ui/badge";
-
+ 
 import type { LucideIcon } from "lucide-react";
 
 const PROMPT_SUGGESTIONS: {
