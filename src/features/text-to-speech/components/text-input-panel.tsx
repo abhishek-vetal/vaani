@@ -3,7 +3,6 @@
 import { Textarea } from "@/components/ui/textarea"
 import { COST_PER_UNIT, TEXT_MAX_LENGTH } from "../data/constants"
 import { Coins } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
 // this component gets access to the parent TTS form
 import { useTypedAppFormContext } from "@/hooks/use-app-form"
 import { ttsFormOptions } from "./text-to-speech-form"

@@ -160,7 +160,6 @@ export const generationsRouter = createTRPCRouter({
         });
       }
 
-      // @ts-ignore: mapping the UI parameters to what the current Modal backend actually expects
       const { data, error } = await chatterbox.POST("/generate", {
         body: {
           prompt: input.text,
@@ -171,7 +170,7 @@ export const generationsRouter = createTRPCRouter({
           repetition_penalty: input.repetitionPenalty,
           exaggeration: input.exaggeration,
           norm_loudness: true,
-        } as any,
+        },
         // treat the response as binary data rather than normal JSON
         parseAs: "arrayBuffer",
       });

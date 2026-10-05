@@ -17,6 +17,11 @@ export const metadata: Metadata = {
     template: "%s | Vaani"
   },
   description: "AI powered Text to Speech and Voice cloning platform.",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({ children } : {children: React.ReactNode}) {
