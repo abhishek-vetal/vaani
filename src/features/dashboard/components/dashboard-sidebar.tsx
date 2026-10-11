@@ -53,10 +53,9 @@ function NavSection({ label, items, pathname }: NavSectionProps) {
                 <SidebarMenuButton
                   asChild={!!item.url}
                   onClick={item.onClick}
-                  // Displays the item's name when the user hovers over it
                   tooltip={item.title}
                   isActive={!!item.url && (pathname === item.url || pathname?.startsWith(`${item.url}/`))}
-                  className="h-9 px-3 py-2 text-[13px] tracking-tight font-medium border border-transparent data-[active=true]:border-border data-[active=true]:shadow-[0px_1px_1px_0px_rgba(44,54,53,0.03),inset_0px_0px_0px_2px_white]"
+                  className="h-10 rounded-xl px-3 py-2 text-[13px] font-medium tracking-tight text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900 [&_svg]:text-slate-400 hover:[&_svg]:text-slate-600 data-[active=true]:bg-rose-50/90 data-[active=true]:text-brand data-[active=true]:font-semibold data-[active=true]:shadow-none data-[active=true]:[&_svg]:text-brand data-[active=true]:hover:bg-rose-100/60 data-[active=true]:hover:text-brand data-active:bg-rose-50/90 data-active:text-brand data-active:font-semibold data-active:shadow-none data-active:[&_svg]:text-brand data-active:hover:bg-rose-100/60 data-active:hover:text-brand"
                 >
                   {item.url ? (
                     <Link href={item.url}>
@@ -80,12 +79,8 @@ function NavSection({ label, items, pathname }: NavSectionProps) {
 }
 
 export function DashboardSidebar() {
-  // used to get the path: /text-to-speech if the url is https://domain.com/text-to-speech
-  // we use this inorder to highlight the current navMenutItem
-  const pathname = usePathname()
-  // use this to open the clerk OrganizationProfile
-  const clerk = useClerk()
-  // used to open the voice cloning where we upload our own voice 
+  const pathname = usePathname();
+  const clerk = useClerk();
   const [voiceDialogOpen, setVoiceDialogOpen] = useState(false);
 
   const mainMenuItems: MenuItem[] = [
@@ -119,7 +114,7 @@ export function DashboardSidebar() {
     },
     {
       title: "Help and support",
-      url: "mailto:business@vaani.com",
+      url: "mailto:business@vaani-ai.online",
       icon: Headphones,
     },
     {
@@ -137,36 +132,36 @@ export function DashboardSidebar() {
       />
 
       <Sidebar variant="sidebar" collapsible="icon">
-        <SidebarHeader>
-          <div className="flex items-center gap-3 group-data-[collapsible=icon]:justify-center">
-            <Image
-              src="/logo.png"
-              alt="Vaani logo"
-              width={42}
-              height={42}
-              className="shrink-0"
-            />
+        <SidebarHeader className="p-3 pb-2.5 gap-2.5">
+          <div className="flex items-center gap-2.5 px-1 py-0.5 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-2.5 transition-opacity hover:opacity-90 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-rose-500/30 rounded-lg"
+            >
+              <Image
+                src="/logo.png"
+                alt="Vaani logo"
+                width={38}
+                height={38}
+                className="size-[38px] shrink-0 select-none"
+                priority
+              />
 
-            <div className="flex flex-col leading-none group-data-[collapsible=icon]:hidden">
-              <h1 className="text-[18px] font-extrabold tracking-[-0.04em] text-red-950">
+              <span className="text-[20px] font-semibold tracking-[-0.03em] text-charcoal leading-none group-data-[collapsible=icon]:hidden">
                 Vaani
-              </h1>
-
-              <p className="mt-1 text-[12px] font-semibold tracking-[-0.01em] text-zinc-400">
-                Voices that connect
-              </p>
-            </div>
+              </span>
+            </Link>
 
             <SidebarTrigger className="ml-auto lg:hidden" />
           </div>
 
           <SidebarMenu>
-            <SidebarMenuItem className="mt-2">
+            <SidebarMenuItem>
               <OrganizationSwitcher
                 hidePersonal={true}
                 fallback={
                   <Skeleton
-                    className="h-8.5 w-full group-data-[collapsible=icon]:size-8 rounded-md border bg-white"
+                    className="h-9 w-full group-data-[collapsible=icon]:size-8 rounded-xl border border-slate-200/80 bg-white"
                   />
                 }
                 appearance={{
@@ -174,15 +169,16 @@ export function DashboardSidebar() {
                     rootBox:
                       "w-full! group-data-[collapsible=icon]:w-auto! group-data-[collapsible=icon]:flex! group-data-[collapsible=icon]:justify-center!",
                     organizationSwitcherTrigger:
-                      "w-full! justify-between! bg-white! border! border-border! rounded-md! pl-1! pr-2! py-1! gap-3! group-data-[collapsible=icon]:w-auto! group-data-[collapsible=icon]:p-1! shadow-[0px_1px_1.5px_0px_rgba(44,54,53,0.03)]!",
-                    organizationPreview: "gap-2!",
+                      "w-full! h-9! justify-between! items-center! bg-white! border! border-slate-200/80! hover:border-slate-300! hover:bg-slate-50/70! transition-colors! rounded-xl! px-2! gap-2! shadow-2xs! group-data-[collapsible=icon]:w-auto! group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:justify-center!",
+                    organizationPreview: "flex! items-center! gap-2! min-w-0!",
                     organizationPreviewAvatarBox:
-                      "size-7! group-data-[collapsible=icon]:size-6! rounded-sm!",
+                      "size-6! shrink-0! rounded-md!",
                     organizationPreviewTextContainer:
-                      "text-xs! tracking-tight! font-medium! text-foreground! group-data-[collapsible=icon]:hidden!",
-                    organizationPreviewMainIdentifier: "text-[13px]!",
+                      "min-w-0! text-left! group-data-[collapsible=icon]:hidden!",
+                    organizationPreviewMainIdentifier:
+                      "truncate! text-[13px]! font-medium! text-slate-800! tracking-tight!",
                     organizationSwitcherTriggerIcon:
-                      "size-4! text-sidebar-foreground! group-data-[collapsible=icon]:hidden!",
+                      "size-3.5! text-slate-400! shrink-0! group-data-[collapsible=icon]:hidden!",
                   },
                 }}
               />
@@ -206,8 +202,7 @@ export function DashboardSidebar() {
 
         <div className="border-b border-dotted" />
 
-        <SidebarFooter>
-          {/* shows the user consumed amount */}
+        <SidebarFooter className="p-3 gap-2.5">
           <UsageContainer />
 
           <SidebarMenu>
@@ -215,14 +210,14 @@ export function DashboardSidebar() {
               <UserButton
                 showName={true}
                 fallback={
-                  <Skeleton className="h-8.5 w-full group-data-[collapsible=icon]:size-8 rounded-md border border-border bg-white" />
+                  <Skeleton className="h-8.5 w-full group-data-[collapsible=icon]:size-8 rounded-xl border border-border bg-white" />
                 }
                 appearance={{
                   elements: {
                     rootBox:
                       "w-full! group-data-[collapsible=icon]:w-auto! group-data-[collapsible=icon]:flex! group-data-[collapsible=icon]:justify-center!",
                     userButtonTrigger:
-                      "w-full! justify-between! bg-white! border! border-border! rounded-md! pl-1! pr-2! py-1! shadow-[0px_1px_1.5px_0px_rgba(44,54,53,0.03)]! group-data-[collapsible=icon]:w-auto! group-data-[collapsible=icon]:p-1! group-data-[collapsible=icon]:after:hidden! [--border:color-mix(in_srgb,transparent,var(--clerk-color-neutral,#000000)_15%)]!",
+                      "w-full! justify-between! bg-white! border! border-border! rounded-xl! pl-1! pr-2! py-1! shadow-[0px_1px_1.5px_0px_rgba(44,54,53,0.03)]! group-data-[collapsible=icon]:w-auto! group-data-[collapsible=icon]:p-1! group-data-[collapsible=icon]:after:hidden! [--border:color-mix(in_srgb,transparent,var(--clerk-color-neutral,#000000)_15%)]!",
                     userButtonBox: "flex-row-reverse! gap-2!",
                     userButtonOuterIdentifier:
                       "text-[13px]! tracking-tight! font-medium! text-foreground! pl-0! group-data-[collapsible=icon]:hidden!",

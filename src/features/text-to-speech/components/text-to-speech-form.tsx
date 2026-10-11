@@ -13,7 +13,6 @@ import { useCheckout } from "@/features/billing/hooks/use-checkout";
 const ttsFormSchema = z.object({
   text: z.string().min(1, "Please enter some text"),
   voiceId: z.string().min(1, "Please select a voice"),
-  // below are voice generation settings 
   temperature: z.number(),
   topP: z.number(),
   topK: z.number(),
@@ -21,8 +20,6 @@ const ttsFormSchema = z.object({
   exaggeration: z.number(),
 });
 
-// we tell zod take the schema and generate the TypeScript type from it
-// when using useTypedAppFormContext(ttsFormOptions)
 export type TTSFormValues = z.infer<typeof ttsFormSchema>;
 
 export const defaultTTSValues: TTSFormValues = {
@@ -35,7 +32,6 @@ export const defaultTTSValues: TTSFormValues = {
   exaggeration: 1.0,
 };
 
-// these are the defualt values for my TTS form which I will use in the child components
 export const ttsFormOptions = formOptions({
   defaultValues: defaultTTSValues,
 });
@@ -51,19 +47,12 @@ export function TextToSpeechForm({
   const queryClient = useQueryClient();
   const router = useRouter();
 
-//   Query
-// → get data
-
-//   Mutation
-// → create / update / delete / perform action
-// we are performing these to generate audio
   const createMutation = useMutation(
     trpc.generations.create.mutationOptions({}),
   );
 
   const { checkout } = useCheckout();
 
-  // this is used to create the form
   const form = useAppForm({
     ...ttsFormOptions,
     defaultValues: defaultValuesFromView ?? defaultTTSValues,

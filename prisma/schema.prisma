@@ -76,3 +76,26 @@ model Generation {
   @@index([orgId])
   @@index([voiceId])
 }
+
+enum UsageEventStatus {
+  PENDING
+  DELIVERED
+  FAILED
+}
+
+model UsageEvent {
+  id          String           @id @default(cuid())
+  externalId  String           @unique
+  eventName   String
+  customerId  String
+  properties  Json
+  status      UsageEventStatus @default(PENDING)
+  attempts    Int              @default(0)
+  lastError   String?
+  deliveredAt DateTime?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([status, createdAt])
+  @@index([customerId])
+}

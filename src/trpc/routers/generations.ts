@@ -5,6 +5,7 @@ import { TRPCError } from "@trpc/server";
 import { chatterbox } from "@/lib/chatterbox-client";
 import prisma from "@/lib/db";
 import { uploadAudio, deleteAudio } from "@/lib/r2";
+import { recordAndDispatchUsageEvent } from "@/lib/usage-outbox";
 import { TEXT_MAX_LENGTH } from "@/features/text-to-speech/data/constants";
 import { createTRPCRouter, orgProcedure } from "../init";
 
@@ -249,20 +250,18 @@ export const generationsRouter = createTRPCRouter({
         });
       }
 
-      // Ingest usage event to Polar (fire-and-forget, don't block response)
-      polar.events
-        .ingest({
-          events: [
-            {
-              name: env.POLAR_METER_TTS_GENERATION,
-              externalCustomerId: ctx.orgId,
-              metadata: { [env.POLAR_METER_TTS_PROPERTY]: input.text.length },
-            },
-          ],
-        })
-        .catch((error) => {
-          console.error("Failed to ingest Polar TTS generation event:", error);
-        });
+      // Durably record billable usage in the outbox and dispatch to Polar
+      await recordAndDispatchUsageEvent({
+        externalId: `gen_${generationId}`,
+        eventName: env.POLAR_METER_TTS_GENERATION,
+        customerId: ctx.orgId,
+        properties: { [env.POLAR_METER_TTS_PROPERTY]: input.text.length },
+      }).catch((error) => {
+        console.error(
+          "Failed to process outbox event for TTS generation:",
+          error,
+        );
+      });
 
       return {
         id: generationId,

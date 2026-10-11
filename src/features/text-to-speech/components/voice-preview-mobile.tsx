@@ -74,7 +74,6 @@ export function VoicePreviewMobile({
 
   return (
     <div className="border-t p-4 lg:hidden">
-      {/* audio element is used to refer to the audio  */}
       <audio
         ref={audioRef}
         src={audioUrl}
@@ -85,29 +84,31 @@ export function VoicePreviewMobile({
 
       <div className="grid grid-cols-[1fr_auto] items-center gap-4">
         <div className="min-w-0">
-          <p className="truncate text-sm font-medium">{text}</p>
+          <p className="truncate text-sm font-medium text-slate-900" title={text}>{text}</p>
 
           {voice && (
-            <div className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+            <div className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500">
               <VoiceAvatar
                 seed={voice.id ?? voice.name}
                 name={voice.name}
-                className="shrink-0"
+                className="size-3.5 shrink-0 rounded-full border border-slate-200/60"
               />
-              <span className="truncate">{voice.name}</span>
+              <span className="truncate font-medium text-slate-700">{voice.name}</span>
             </div>
           )}
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={handleDownload} className="text-slate-500 hover:text-slate-900 size-9 rounded-full">
+          <Button variant="ghost" size="icon" onClick={handleDownload} aria-label="Download generated audio" className="text-slate-500 hover:text-slate-900 size-9 rounded-full">
             <Download className="size-4" />
           </Button>
 
           <Button
             size="icon"
-            className="rounded-full size-10 bg-slate-900 hover:bg-slate-800 text-white shadow-sm transition-all active:scale-95"
+            className="rounded-full size-10 bg-slate-900 text-white shadow-xs transition-all hover:bg-slate-800 hover:ring-2 hover:ring-rose-500/25 active:scale-95 focus-visible:ring-2 focus-visible:ring-rose-500/40 focus-visible:ring-offset-1 focus-visible:outline-hidden"
             onClick={togglePlayPause}
+            aria-label={isPlaying ? "Pause generated audio" : "Play generated audio"}
+            aria-pressed={isPlaying}
           >
             {isPlaying ? (
               <Pause className="size-4 fill-current" />

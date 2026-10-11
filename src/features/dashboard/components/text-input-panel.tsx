@@ -1,102 +1,82 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import {
   TEXT_MAX_LENGTH,
   COST_PER_UNIT,
-} from "@/features/text-to-speech/data/constants"
-import { Coins, AudioLines } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { useState } from "react"
+} from "@/features/text-to-speech/data/constants";
+import { AudioLines, Coins } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
+
+const currency = new Intl.NumberFormat("en-IN", {
+  style: "currency",
+  currency: "INR",
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+function formatEstimatedCost(characterCount: number): string {
+  if (characterCount === 0) return "₹ 0.00";
+  const cost = characterCount * COST_PER_UNIT;
+  if (cost < 0.01) return "< ₹ 0.01";
+  return currency.format(cost).replace("₹", "₹ ");
+}
 
 export function TextInputPanel() {
-  const [text, setText] = useState("")
-  const router = useRouter()
+  const [text, setText] = useState("");
+  const router = useRouter();
+  const estimatedCost = useMemo(() => formatEstimatedCost(text.length), [text]);
 
   const handleGenerate = () => {
-    const trimmed = text.trim()
-    if (!trimmed) return
+    const trimmed = text.trim();
+    if (!trimmed) return;
 
-    router.push(
-      // encodeURIComponent is used so that dealing with special character will be easy for url 
-      // space to %20 
-      `/text-to-speech?text=${encodeURIComponent(trimmed)}`
-    )
-  }
+    router.push(`/text-to-speech?text=${encodeURIComponent(trimmed)}`);
+  };
 
   return (
-    <div className="relative rounded-3xl border border-slate-200 bg-white shadow-sm transition-all focus-within:border-indigo-300 focus-within:ring-[3px] focus-within:ring-indigo-500/10 focus-within:shadow-md overflow-hidden">
-      <div className="flex flex-col p-2">
-        {/* Input Area */}
+    <section aria-label="Text to speech editor" className="h-[270px] overflow-hidden rounded-[1.5rem] border border-slate-200/90 bg-white shadow-[0_12px_40px_rgba(23,23,25,0.05)] transition-all focus-within:border-rose-300 focus-within:ring-4 focus-within:ring-rose-100/70 sm:h-[310px] lg:h-[330px]">
+      <div className="flex h-full min-h-0 flex-col p-2.5 sm:p-3">
         <Textarea
-          placeholder="Start typing or paste your text here..."
+          aria-label="Text to convert to speech"
+          placeholder="Write or paste text to turn into expressive speech..."
           maxLength={TEXT_MAX_LENGTH}
           value={text}
-          onChange={(e) => setText(e.target.value)}
-          className="
-            min-h-[160px]
-            resize-none
-            border-0
-            bg-transparent
-            p-4
-            text-lg
-            leading-relaxed
-            shadow-none
-            text-slate-900
-            placeholder:text-slate-400
-            focus-visible:ring-0
-            wrap-anywhere
-          "
+          onChange={(event) => setText(event.target.value)}
+          className="min-h-0 flex-1 resize-none overflow-y-auto overscroll-contain border-0 bg-transparent p-3 text-base leading-7 text-slate-900 shadow-none [field-sizing:fixed] placeholder:text-slate-400 focus-visible:ring-0 sm:p-4"
         />
 
-        {/* Unified Bottom Control Bar */}
-        <div className="mt-1 flex flex-col sm:flex-row items-center justify-between gap-4 p-2 rounded-2xl bg-slate-50/80 border border-slate-100/50">
-          
-          {/* Info Section */}
-          <div className="flex items-center gap-4 px-3">
-            <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
-              <Coins className="size-3.5 text-indigo-400/80" />
+        <div className="shrink-0 flex flex-col gap-3 rounded-2xl border border-slate-100 bg-[#fbfaf8] p-3 sm:flex-row sm:items-center sm:justify-between sm:p-3.5">
+          <div className="flex min-w-0 items-center gap-3 px-1 sm:px-2">
+            <div className="flex items-center gap-1.5 text-xs">
+              <Coins className="size-3.5 shrink-0 text-brand" />
               {text.length === 0 ? (
-                <span>Start typing to estimate</span>
+                <span className="text-slate-400">Estimated cost</span>
               ) : (
-                <span>
-                  <span className="text-slate-900 font-semibold">
-                    ₹{(text.length * COST_PER_UNIT).toFixed(3)}
-                  </span>{" "}
-                  estimated
-                </span>
+                <>
+                  <span className="font-semibold text-slate-900 tabular-nums">{estimatedCost}</span>
+                  <span className="font-normal text-slate-500">estimated</span>
+                </>
               )}
             </div>
-            
-            <div className="h-3 w-px bg-slate-200" />
-            
-            <span className="text-xs font-medium text-slate-400 tabular-nums">
-              {text.length.toLocaleString()} / {TEXT_MAX_LENGTH.toLocaleString()}
+            <div className="h-3.5 w-px shrink-0 bg-slate-200" />
+            <span className="shrink-0 text-xs font-normal tabular-nums text-slate-400">
+              <span className="font-medium text-slate-600">{text.length.toLocaleString()}</span> / {TEXT_MAX_LENGTH.toLocaleString()}
             </span>
           </div>
 
-          {/* Action Button */}
           <Button
-            size="sm"
             disabled={!text.trim()}
-            className="
-              group
-              h-10 rounded-xl px-6 font-semibold w-full sm:w-auto
-              bg-slate-900 text-white
-              shadow-[0_1px_2px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.15)]
-              hover:bg-slate-800
-              transition-all
-              active:scale-[0.98]
-              disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none disabled:border disabled:border-slate-200 disabled:transform-none
-            "
+            className="group inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-brand px-5 font-medium text-sm text-white shadow-xs transition-all duration-150 ease-out select-none hover:bg-brand-hover active:bg-brand-active active:scale-[0.99] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-rose-500/30 focus-visible:ring-offset-2 disabled:border disabled:border-slate-200/80 disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none disabled:cursor-not-allowed disabled:pointer-events-none sm:w-auto"
             onClick={handleGenerate}
           >
-            <AudioLines className="mr-2 size-4 opacity-70 transition-opacity group-hover:opacity-100" />
+            <AudioLines className="size-4 shrink-0 text-white/90 transition-opacity group-hover:text-white" />
             Generate speech
           </Button>
         </div>
       </div>
-    </div>
-  )
+    </section>
+  );
 }

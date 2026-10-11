@@ -1,5 +1,6 @@
 import { SignIn } from "@clerk/nextjs";
+import { authAppearance } from "../../auth-appearance";
 
 export default function Page() {
-  return <SignIn />;
+  return <SignIn appearance={authAppearance} />;
 }

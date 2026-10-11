@@ -72,10 +72,9 @@ export function VoiceCreateDialog({
         {children && <DrawerTrigger asChild>{children}</DrawerTrigger>}
         <DrawerContent>
           <DrawerHeader>
-            <DrawerTitle>Create custom voice</DrawerTitle>
+            <DrawerTitle>Create a voice</DrawerTitle>
             <DrawerDescription>
-              Upload or record an audio sample to add a new voice to your
-              library.
+              Add a voice to your library.
             </DrawerDescription>
           </DrawerHeader>
           <VoiceCreateForm
@@ -99,11 +98,11 @@ export function VoiceCreateDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {children && <DialogTrigger asChild>{children}</DialogTrigger>}
-      <DialogContent className="sm:max-w-120 max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-115 max-h-[90vh] overflow-y-auto">
         <DialogHeader className="text-left">
-          <DialogTitle>Create custom voice</DialogTitle>
+          <DialogTitle>Create a voice</DialogTitle>
           <DialogDescription>
-            Upload or record an audio sample to add a new voice to your library.
+            Add a voice to your library.
           </DialogDescription>
         </DialogHeader>
         <VoiceCreateForm onError={handleError} onSuccess={handleClose} />
