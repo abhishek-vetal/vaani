@@ -42,7 +42,6 @@ export function TextToSpeechDetailView({
       ? generation.voiceId      
       : fallbackVoiceId;
 
-  // fill the generation values inside the default values
   const defaultValues: TTSFormValues = {
     text: generation.text,
     voiceId: resolvedVoiceId,
@@ -53,7 +52,6 @@ export function TextToSpeechDetailView({
     exaggeration: generation.exaggeration,
   };
   
-  // this is used to provide to the user avatar
   const generationVoice = {
     id: generation.voiceId ?? undefined,
     name: generation.voiceName,
@@ -66,11 +64,13 @@ export function TextToSpeechDetailView({
           <div className="flex min-h-0 flex-1 flex-col">
             <TextInputPanel />
             <VoicePreviewMobile
+              key={`mobile-${generation.id}`}
               audioUrl={generation.audioUrl}
               voice={generationVoice}
               text={generation.text}
             />
             <VoicePreviewPanel
+              key={`desktop-${generation.id}`}
               audioUrl={generation.audioUrl}
               voice={generationVoice}
               text={generation.text}

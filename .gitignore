@@ -48,3 +48,8 @@ next-env.d.ts
 __pycache__
 
 chatterbox_tts.py
+# clerk configuration (can include secrets)
+/.clerk/
+
+# scratch and temporary scripts
+/scratch/

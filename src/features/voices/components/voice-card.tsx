@@ -71,7 +71,7 @@ export function VoiceCard({ voice }: VoiceCardProps) {
   );
 
   return (
-    <div className="group flex items-center justify-between gap-3 sm:gap-4 rounded-2xl border border-slate-200/80 bg-white p-3.5 sm:p-4 transition-all duration-200 hover:border-slate-300 hover:shadow-xs">
+    <div className="group flex items-center justify-between gap-3 sm:gap-4 rounded-2xl border border-slate-200/80 bg-white p-3.5 sm:p-4 transition-all duration-200 hover:border-slate-300 hover:shadow-xs min-h-23">
       <div className="flex items-center gap-3 sm:gap-3.5 min-w-0 flex-1">
         {/* Proportional circular avatar */}
         <VoiceAvatar
@@ -83,15 +83,22 @@ export function VoiceCard({ voice }: VoiceCardProps) {
         {/* Voice Details */}
         <div className="flex min-w-0 flex-1 flex-col justify-center gap-1">
           <div className="flex items-center gap-2 min-w-0">
-            <span className="truncate text-sm sm:text-base font-semibold text-slate-900 tracking-tight">
+            <Link
+              href={`/text-to-speech?voiceId=${encodeURIComponent(voice.id)}`}
+              className="truncate text-sm sm:text-base font-semibold text-slate-900 tracking-tight hover:text-brand transition-colors focus-visible:outline-hidden focus-visible:underline"
+              title={`Use ${voice.name}`}
+            >
               {voice.name}
-            </span>
+            </Link>
             <span className="text-xs text-slate-400 font-normal shrink-0">
-              · {VOICE_CATEGORY_LABELS[voice.category]}
+              · {VOICE_CATEGORY_LABELS[voice.category] ?? voice.category}
             </span>
           </div>
 
-          <p className="line-clamp-1 text-xs text-slate-500 leading-relaxed">
+          <p
+            className="line-clamp-1 text-xs text-slate-500 leading-relaxed break-words"
+            title={voice.description ?? undefined}
+          >
             {voice.description}
           </p>
 
@@ -103,18 +110,38 @@ export function VoiceCard({ voice }: VoiceCardProps) {
 
       {/* Actions */}
       <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
+        {/* Subtle "Use voice" action when hovered or focused */}
+        <Button
+          asChild
+          variant="ghost"
+          size="sm"
+          className="h-8.5 px-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-brand hover:bg-rose-50/80 transition-all opacity-0 group-hover:opacity-100 focus-visible:opacity-100 hidden sm:inline-flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-rose-500/30"
+        >
+          <Link
+            href={`/text-to-speech?voiceId=${encodeURIComponent(voice.id)}`}
+            title={`Use ${voice.name} for speech generation`}
+          >
+            <Mic className="size-3.5 text-slate-400 group-hover:text-brand transition-colors" />
+            <span>Use voice</span>
+          </Link>
+        </Button>
+
+        {/* Play/pause preview button */}
         <Button
           variant="outline"
           size="icon-sm"
           className={cn(
-            "rounded-full transition-all size-9",
+            "rounded-full transition-all size-9 focus-visible:ring-2 focus-visible:ring-rose-500/30",
             isPlaying
-              ? "bg-slate-900 text-white border-slate-900 hover:bg-slate-800 shadow-xs"
-              : "border-slate-200 bg-slate-50/50 text-slate-700 hover:bg-slate-900 hover:text-white hover:border-slate-900 shadow-2xs"
+              ? "bg-brand text-white border-brand hover:bg-brand-hover shadow-xs ring-2 ring-rose-500/20"
+              : "border-slate-200/90 bg-slate-50/80 text-slate-700 hover:bg-slate-900 hover:text-white hover:border-slate-900 shadow-2xs"
           )}
-          onClick={togglePlay}
+          onClick={(e) => {
+            e.stopPropagation();
+            togglePlay();
+          }}
           disabled={isLoading}
-          aria-label={isPlaying ? "Pause voice preview" : "Play voice preview"}
+          aria-label={isPlaying ? `Pause voice preview for ${voice.name}` : `Play voice preview for ${voice.name}`}
         >
           {isLoading ? (
             <Spinner className="size-3.5" />
@@ -125,19 +152,21 @@ export function VoiceCard({ voice }: VoiceCardProps) {
           )}
         </Button>
 
+        {/* Overflow menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button 
               variant="ghost" 
               size="icon-sm" 
-              className="rounded-full size-9 text-slate-400 hover:text-slate-900 hover:bg-slate-100"
+              className="rounded-full size-9 text-slate-400 hover:text-slate-900 hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-rose-500/30"
+              aria-label={`More options for ${voice.name}`}
             >
               <MoreHorizontal className="size-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="rounded-xl shadow-lg border-slate-200">
-            <DropdownMenuItem asChild className="rounded-lg">
-              <Link href={`/text-to-speech?voiceId=${voice.id}`}>
+          <DropdownMenuContent align="end" className="rounded-xl shadow-lg border-slate-200 min-w-40">
+            <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
+              <Link href={`/text-to-speech?voiceId=${encodeURIComponent(voice.id)}`}>
                 <Mic className="size-4 text-slate-700" />
                 <span className="font-semibold text-slate-800">Use this voice</span>
               </Link>
@@ -145,7 +174,7 @@ export function VoiceCard({ voice }: VoiceCardProps) {
             {voice.variant === "CUSTOM" && (
               <DropdownMenuItem
                 onClick={() => setShowDeleteDialog(true)}
-                className="text-destructive focus:text-destructive"
+                className="text-destructive focus:text-destructive cursor-pointer rounded-lg"
               >
                 <Trash2 className="size-4 text-destructive" />
                 <span className="font-medium">Delete voice</span>

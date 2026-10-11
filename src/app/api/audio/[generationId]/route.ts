@@ -26,17 +26,39 @@ export async function GET(
     return new Response("Audio is not available yet", { status: 409 });
   }
 
-  const signedUrl = await getSignedAudioUrl(generation.r2ObjectKey);
-  const audioResponse = await fetch(signedUrl);
+  const rangeHeader = _request.headers.get("range");
+  const fetchHeaders: HeadersInit = {};
+  if (rangeHeader) {
+    fetchHeaders["Range"] = rangeHeader;
+  }
 
-  if (!audioResponse.ok) {
+  const signedUrl = await getSignedAudioUrl(generation.r2ObjectKey);
+  const audioResponse = await fetch(signedUrl, { headers: fetchHeaders });
+
+  if (!audioResponse.ok && audioResponse.status !== 206) {
     return new Response("Failed to fetch audio", { status: 502 });
   }
 
+  const responseHeaders = new Headers();
+  responseHeaders.set(
+    "Content-Type",
+    audioResponse.headers.get("content-type") || "audio/wav",
+  );
+  responseHeaders.set("Accept-Ranges", "bytes");
+  responseHeaders.set("Cache-Control", "private, max-age=3600");
+
+  const contentRange = audioResponse.headers.get("content-range");
+  if (contentRange) {
+    responseHeaders.set("Content-Range", contentRange);
+  }
+
+  const contentLength = audioResponse.headers.get("content-length");
+  if (contentLength) {
+    responseHeaders.set("Content-Length", contentLength);
+  }
+
   return new Response(audioResponse.body, {
-    headers: {
-      "Content-Type": "audio/wav",
-      "Cache-Control": "private, max-age=3600",
-    },
+    status: audioResponse.status,
+    headers: responseHeaders,
   });
 };
