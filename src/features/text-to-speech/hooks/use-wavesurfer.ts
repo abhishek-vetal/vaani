@@ -7,11 +7,19 @@ import WaveSurfer from "wavesurfer.js";
 interface UseWaveSurferOptions {
   url?: string;
   autoplay?: boolean;
+  waveColor?: string;
+  progressColor?: string;
+  cursorColor?: string;
+  cursorWidth?: number;
 }
 
 export function useWaveSurfer({
   url,
   autoplay,
+  waveColor = "#cbd5e1",
+  progressColor = "#ed3e59",
+  cursorColor = "#ed3e59",
+  cursorWidth = 1.5,
 }: UseWaveSurferOptions) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const wavesurferRef = useRef<WaveSurfer | null>(null);
@@ -41,10 +49,10 @@ export function useWaveSurfer({
 
     const ws = WaveSurfer.create({
       container: containerRef.current,
-      waveColor: "#cbd5e1",
-      progressColor: "#0f172a",
-      cursorColor: "#0f172a",
-      cursorWidth: 2,
+      waveColor,
+      progressColor,
+      cursorColor,
+      cursorWidth,
       barWidth: 2,
       barGap: 2,
       barRadius: 2,
@@ -84,7 +92,7 @@ export function useWaveSurfer({
       ws.destroy();
       wavesurferRef.current = null;
     };
-  }, [url, autoplay]);
+  }, [url, autoplay, waveColor, progressColor, cursorColor, cursorWidth]);
 
   const togglePlayPause = useCallback(() => {
     wavesurferRef.current?.playPause();

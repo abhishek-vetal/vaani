@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useQueryState } from "nuqs";
 import { useDebouncedCallback } from "use-debounce";
 import { CirclePlus, Search, X } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import {
   InputGroup,
@@ -50,7 +49,7 @@ export function VoicesToolbar() {
       </div>
 
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        <InputGroup className="w-full sm:max-w-md h-10 rounded-xl border border-slate-200 bg-white shadow-xs focus-within:border-indigo-300 focus-within:ring-2 focus-within:ring-indigo-500/10">
+        <InputGroup className="w-full sm:max-w-md h-10 rounded-xl border border-slate-200 bg-white shadow-xs focus-within:border-rose-400 focus-within:ring-2 focus-within:ring-rose-500/20 transition-all">
           <InputGroupAddon align="inline-start">
             <Search className="size-4 text-slate-400" />
           </InputGroupAddon>
@@ -93,7 +92,7 @@ export function VoicesToolbar() {
 
         {/* Custom voice action button */}
         <VoiceCreateDialog>
-          <Button className="h-10 rounded-xl px-5 font-semibold bg-slate-900 hover:bg-slate-800 text-white shadow-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 w-full sm:w-auto shrink-0">
+          <Button className="h-10 rounded-xl px-5 font-semibold bg-slate-900 hover:bg-slate-800 text-white shadow-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 w-full sm:w-auto shrink-0 cursor-pointer">
             <CirclePlus className="size-4" />
             <span>Create Custom Voice</span>
           </Button>

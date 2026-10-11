@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "tsx --env-file=.env --test tests/**/*.test.ts",
     "sync-api": "tsx scripts/sync-api.ts",
     "postinstall": "prisma generate"
   },
@@ -17,8 +18,8 @@
     "@base-ui/react": "^1.5.0",
     "@clerk/nextjs": "^7.4.3",
     "@clerk/themes": "^2.4.57",
-    "@dicebear/core": "^10.3.0",
-    "@dicebear/styles": "^10.2.0",
+    "@dicebear/core": "^10.7.0",
+    "@dicebear/styles": "^10.6.0",
     "@polar-sh/sdk": "^0.48.1",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
@@ -30,6 +31,7 @@
     "@trpc/server": "^11.17.0",
     "@trpc/tanstack-react-query": "^11.17.0",
     "@types/recordrtc": "^5.6.15",
+    "boring-avatars": "^2.0.4",
     "class-variance-authority": "^0.7.1",
     "client-only": "^0.0.1",
     "clsx": "^2.1.1",
@@ -58,7 +60,6 @@
     "recordrtc": "^5.6.2",
     "server-only": "^0.0.1",
     "shadcn": "^4.10.0",
-    "simplex-noise": "^4.0.3",
     "sonner": "^2.0.7",
     "superjson": "^2.2.6",
     "tailwind-merge": "^3.6.0",
@@ -69,7 +70,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
+    "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^20",
     "@types/pg": "^8.20.0",
     "@types/react": "^19",
@@ -78,7 +79,7 @@
     "eslint-config-next": "16.2.7",
     "openapi-typescript": "^7.13.0",
     "prisma": "^7.8.0",
-    "tailwindcss": "^4",
+    "tailwindcss": "^4.3.3",
     "tsx": "^4.22.4",
     "typescript": "^5"
   }

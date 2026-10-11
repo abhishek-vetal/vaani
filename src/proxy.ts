@@ -1,13 +1,27 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-const isPublicRoute = createRouteMatcher(["/", "/sign-in(.*)", "/sign-up(.*)", "/audio(.*)"]);
+const isPublicRoute = createRouteMatcher(["/", "/sign-in(.*)", "/sign-up(.*)"]);
 const isOrgSelectionRoute = createRouteMatcher(["/org-selection(.*)"]);
+const isApiRoute = createRouteMatcher(["/api(.*)", "/trpc(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
   const { userId, orgId } = await auth();
 
   if (isPublicRoute(req)) {
+    return NextResponse.next();
+  }
+
+  if (isApiRoute(req)) {
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (!orgId) {
+      return NextResponse.json(
+        { error: "Organization required" },
+        { status: 403 },
+      );
+    }
     return NextResponse.next();
   }
 

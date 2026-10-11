@@ -58,7 +58,7 @@ export function VoicesList({ title, voices }: VoicesListProps) {
           {voices.length}
         </span>
       </div>
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
         {voices.map((voice) => (
           <VoiceCard key={voice.id} voice={voice} />
         ))}

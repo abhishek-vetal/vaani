@@ -36,7 +36,11 @@ const envSchema = z.object({
 const env = envSchema.parse(process.env);
 
 // Prisma client instance to communicate with the database
-const adapter = new PrismaPg({ connectionString: env.DATABASE_URL });
+const connectionString = env.DATABASE_URL.replace(
+  /([?&])sslmode=(?:require|prefer|verify-ca)(?=&|$)/g,
+  "$1sslmode=verify-full"
+);
+const adapter = new PrismaPg({ connectionString });
 const prisma = new PrismaClient({ adapter });
 
 const r2 = new S3Client({

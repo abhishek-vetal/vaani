@@ -5,14 +5,20 @@ import { polar } from "@/lib/polar";
 import { env } from "@/lib/env";
 import prisma from "@/lib/db";
 import { uploadAudio } from "@/lib/r2";
+import { recordAndDispatchUsageEvent } from "@/lib/usage-outbox";
 import { VOICE_CATEGORIES } from "@/features/voices/data/voice-categories";
 import type { VoiceCategory } from "@/generated/prisma/client";
 
 const createVoiceSchema = z.object({
-  name: z.string().min(1, "Voice name is required"),
+  name: z.string().trim().min(1, "Voice name is required"),
   category: z.enum(VOICE_CATEGORIES as [VoiceCategory, ...VoiceCategory[]]),
   language: z.string().min(1, "Language is required"),
   description: z.string().nullish(),
+  authorizationConfirmed: z
+    .string()
+    .refine((val) => val === "true" || val === "1", {
+      message: "You must confirm that you have permission to create this voice clone",
+    }),
 });
 
 const MAX_UPLOAD_SIZE_BYTES = 20 * 1024 * 1024; // 20 MB
@@ -47,12 +53,15 @@ export async function POST(request: Request) {
     category: url.searchParams.get("category"),
     language: url.searchParams.get("language"),
     description: url.searchParams.get("description"),
+    authorizationConfirmed: url.searchParams.get("authorizationConfirmed"),
   });
 
   if (!validation.success) {
+    const primaryError =
+      validation.error.issues[0]?.message || "Invalid input";
     return Response.json(
       {
-        error: "Invalid input",
+        error: primaryError,
         issues: validation.error.issues,
       },
       { status: 400 },
@@ -165,20 +174,18 @@ export async function POST(request: Request) {
     );
   }
 
-  // Ingest usage event to Polar (fire-and-forget, don't block response)
-  polar.events
-    .ingest({
-      events: [
-        {
-          name: env.POLAR_METER_VOICE_CREATION,
-          externalCustomerId: orgId,
-          metadata: {},
-        },
-      ],
-    })
-    .catch((error) => {
-      console.error("Failed to ingest Polar voice creation event:", error);
-    });
+  // Durably record billable usage in the outbox and dispatch to Polar
+  await recordAndDispatchUsageEvent({
+    externalId: `voice_${createdVoiceId}`,
+    eventName: env.POLAR_METER_VOICE_CREATION,
+    customerId: orgId,
+    properties: {},
+  }).catch((error) => {
+    console.error(
+      "Failed to process outbox event for custom voice creation:",
+      error,
+    );
+  });
 
   return Response.json(
     { name, message: "Voice created successfully" },

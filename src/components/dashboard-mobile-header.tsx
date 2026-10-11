@@ -4,7 +4,6 @@ import { SidebarTrigger } from "./ui/sidebar";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
-// this will only be avaialable to the screen size != lg if classname contains the lg:hidden
 export function DashboardMobileHeader({ title, className }: { title: string, className?: string }) {
   return (
     <div
@@ -20,12 +19,12 @@ export function DashboardMobileHeader({ title, className }: { title: string, cla
 
       <div className="flex items-center gap-1.5">
         <Button variant="ghost" size="icon-sm" className="rounded-full text-slate-500 hover:text-slate-900 size-8" asChild>
-          <Link href="mailto:business@vaani.com" aria-label="Feedback">
+          <Link href="mailto:business@vaani-ai.online" aria-label="Feedback">
             <ThumbsUp className="size-4" />
           </Link>
         </Button>
         <Button variant="ghost" size="icon-sm" className="rounded-full text-slate-500 hover:text-slate-900 size-8" asChild>
-          <Link href="mailto:business@vaani.com" aria-label="Help & Support">
+          <Link href="mailto:business@vaani-ai.online" aria-label="Help & Support">
             <Headphones className="size-4" />
           </Link>
         </Button>
