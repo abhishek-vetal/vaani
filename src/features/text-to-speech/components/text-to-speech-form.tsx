@@ -79,7 +79,9 @@ export function TextToSpeechForm({
         router.push(`/text-to-speech/${data.id}`);
       } catch (error) {
         const message =
-          error instanceof Error ? error.message : "Failed to generate audio";
+          error instanceof Error
+            ? error.message
+            : "Audio generation is temporarily unavailable. Please try again.";
 
         if (message === "SUBSCRIPTION_REQUIRED") {
           toast.error("Subscription required", {
@@ -88,8 +90,41 @@ export function TextToSpeechForm({
               onClick: () => checkout(),
             },
           });
-        } else {
+        } else if (
+          message === "CREDITS_EXPIRED" ||
+          /credit.*(?:expired|exhausted|depleted)/i.test(message)
+        ) {
+          toast.error(
+            "Free credits have expired. Please upgrade to continue.",
+            {
+              action: {
+                label: "Upgrade",
+                onClick: () => checkout(),
+              },
+            },
+          );
+        } else if (
+          message === "USAGE_LIMIT_REACHED" ||
+          /limit.*reached|usage\s*limit/i.test(message)
+        ) {
+          toast.error(
+            "Audio generation limit reached. Please try again later.",
+          );
+        } else if (
+          message === "Voice not found" ||
+          message === "Voice audio not available"
+        ) {
           toast.error(message);
+        } else {
+          toast.error(
+            "Audio generation is temporarily unavailable. Please try again.",
+            {
+              action: {
+                label: "Retry",
+                onClick: () => form.handleSubmit(),
+              },
+            },
+          );
         }
       }
     },

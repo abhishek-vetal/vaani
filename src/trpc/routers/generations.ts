@@ -7,6 +7,10 @@ import prisma from "@/lib/db";
 import { uploadAudio, deleteAudio } from "@/lib/r2";
 import { recordAndDispatchUsageEvent } from "@/lib/usage-outbox";
 import { TEXT_MAX_LENGTH } from "@/features/text-to-speech/data/constants";
+import {
+  classifyChatterboxError,
+  TTS_ERROR_MESSAGES,
+} from "@/features/text-to-speech/lib/error-handler";
 import { createTRPCRouter, orgProcedure } from "../init";
 
 // this router is basically a collection of backend operations related to generations
@@ -160,34 +164,46 @@ export const generationsRouter = createTRPCRouter({
           message: "Voice audio not available",
         });
       }
-
-      const { data, error } = await chatterbox.POST("/generate", {
-        body: {
-          prompt: input.text,
-          voice_key: voice.r2ObjectKey,
-          temperature: input.temperature,
-          top_p: input.topP,
-          top_k: input.topK,
-          repetition_penalty: input.repetitionPenalty,
-          exaggeration: input.exaggeration,
-          norm_loudness: true,
-        },
-        // treat the response as binary data rather than normal JSON
-        parseAs: "arrayBuffer",
-      });
-
-      if (error) {
+      let chatterboxResult;
+      try {
+        chatterboxResult = await chatterbox.POST("/generate", {
+          body: {
+            prompt: input.text,
+            voice_key: voice.r2ObjectKey,
+            temperature: input.temperature,
+            top_p: input.topP,
+            top_k: input.topK,
+            repetition_penalty: input.repetitionPenalty,
+            exaggeration: input.exaggeration,
+            norm_loudness: true,
+          },
+          // treat the response as binary data rather than normal JSON
+          parseAs: "arrayBuffer",
+        });
+      } catch (networkError) {
+        // Keep technical error details in server logs, without exposing secrets
+        console.error("Chatterbox network error:", networkError instanceof Error ? networkError.message : networkError);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to generate audio",
+          message: TTS_ERROR_MESSAGES.TEMPORARILY_UNAVAILABLE,
         });
       }
 
-      // make sure the actual response is really binary audio data
-      if (!(data instanceof ArrayBuffer)) {
+      const { data, error, response } = chatterboxResult;
+
+      if (error || !(data instanceof ArrayBuffer)) {
+        // Keep technical error details in server logs without exposing secrets
+        console.error("Chatterbox audio generation failed:", {
+          status: response?.status,
+          statusText: response?.statusText,
+          error: typeof error === "object" ? JSON.stringify(error) : error,
+          isInvalidData: !(data instanceof ArrayBuffer),
+        });
+
+        const classified = classifyChatterboxError(response?.status, error);
         throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Invalid audio response",
+          code: classified.code,
+          message: classified.message,
         });
       }
 
@@ -227,7 +243,8 @@ export const generationsRouter = createTRPCRouter({
           },
         });
 
-      } catch {
+      } catch (storeError) {
+        console.error("Failed to store generated audio:", storeError);
         if (generationId) {
           await prisma.generation
             .delete({
@@ -235,18 +252,19 @@ export const generationsRouter = createTRPCRouter({
                 id: generationId,
               },
             })
+            .catch(() => {});
         }
 
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to store generated audio",
+          message: TTS_ERROR_MESSAGES.TEMPORARILY_UNAVAILABLE,
         });
       }
 
       if (!generationId || !r2ObjectKey) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to store generated audio",
+          message: TTS_ERROR_MESSAGES.TEMPORARILY_UNAVAILABLE,
         });
       }
 
