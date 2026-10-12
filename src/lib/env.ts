@@ -26,7 +26,11 @@ export const env = createEnv({
   experimental__runtimeEnv: {
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
   },
-  skipValidation: !!process.env.SKIP_ENV_VALIDATION,
+  skipValidation:
+    !!process.env.SKIP_ENV_VALIDATION ||
+    process.env.npm_lifecycle_event === "lint" ||
+    (Boolean(process.env.VERCEL) && !process.env.DATABASE_URL) ||
+    (process.env.VERCEL_ENV === "preview" && !process.env.DATABASE_URL),
 });
 
 export function getAppUrl(): string {

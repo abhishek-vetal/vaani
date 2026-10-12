@@ -4,7 +4,8 @@ import { env } from "./env";
 
 // Normalize connection string to prevent pg-connection-string security deprecation warning
 // pg v8.13+ warns on 'require', 'prefer', and 'verify-ca', suggesting 'verify-full'
-const connectionString = env.DATABASE_URL.replace(
+const rawDbUrl = env.DATABASE_URL || "postgres://localhost:5432/dummy";
+const connectionString = rawDbUrl.replace(
   /([?&])sslmode=(?:require|prefer|verify-ca)(?=&|$)/g,
   "$1sslmode=verify-full"
 );
