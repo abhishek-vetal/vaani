@@ -6,68 +6,58 @@ describe("Polar Checkout and Application URL Resolution", () => {
   const originalEnv = { ...process.env };
 
   const restoreEnv = () => {
-    process.env = { ...originalEnv };
+    for (const key of Object.keys(process.env)) {
+      if (!(key in originalEnv)) {
+        delete (process.env as Record<string, string | undefined>)[key];
+      }
+    }
+    for (const [key, val] of Object.entries(originalEnv)) {
+      if (val !== undefined) {
+        (process.env as Record<string, string | undefined>)[key] = val;
+      }
+    }
   };
 
-  it("should prioritize NEXT_PUBLIC_APP_URL when set", () => {
-    try {
-      process.env.NEXT_PUBLIC_APP_URL = "https://vaani-ai.online";
-      process.env.VERCEL_ENV = "production";
-      assert.strictEqual(getAppUrl(), "https://vaani-ai.online");
-    } finally {
-      restoreEnv();
-    }
-  });
+  const envRecord = process.env as Record<string, string | undefined>;
 
-  it("should strip trailing slashes from NEXT_PUBLIC_APP_URL", () => {
+  it("should default to canonical https://vaani-ai.online in production when no env vars are set", () => {
     try {
-      process.env.NEXT_PUBLIC_APP_URL = "https://vaani-ai.online/";
-      assert.strictEqual(getAppUrl(), "https://vaani-ai.online");
-    } finally {
-      restoreEnv();
-    }
-  });
-
-  it("should resolve to http://localhost:3000 when configured for local dev", () => {
-    try {
-      process.env.NEXT_PUBLIC_APP_URL = "http://localhost:3000";
-      delete process.env.VERCEL_ENV;
+      delete process.env.APP_URL;
+      delete process.env.NEXT_PUBLIC_APP_URL;
       delete process.env.VERCEL_URL;
+      envRecord.NODE_ENV = "production";
+      assert.strictEqual(getAppUrl(), "https://vaani-ai.online");
+    } finally {
+      restoreEnv();
+    }
+  });
+
+  it("should default to http://localhost:3000 in development when no env vars are set", () => {
+    try {
+      delete process.env.APP_URL;
+      delete process.env.NEXT_PUBLIC_APP_URL;
+      delete process.env.VERCEL_URL;
+      envRecord.NODE_ENV = "development";
       assert.strictEqual(getAppUrl(), "http://localhost:3000");
     } finally {
       restoreEnv();
     }
   });
 
-  it("should fallback to production domain on Vercel production if env var missing", () => {
+  it("should prioritize APP_URL over NEXT_PUBLIC_APP_URL", () => {
     try {
-      delete process.env.NEXT_PUBLIC_APP_URL;
-      process.env.VERCEL_ENV = "production";
+      process.env.APP_URL = "https://vaani-ai.online";
+      process.env.NEXT_PUBLIC_APP_URL = "https://other-url.com";
       assert.strictEqual(getAppUrl(), "https://vaani-ai.online");
     } finally {
       restoreEnv();
     }
   });
 
-  it("should fallback to VERCEL_URL on Vercel preview environments", () => {
+  it("should normalize www. and trailing slashes to canonical origin", () => {
     try {
-      delete process.env.NEXT_PUBLIC_APP_URL;
-      delete process.env.VERCEL_ENV;
-      process.env.VERCEL_URL = "vaani-preview-123.vercel.app";
-      assert.strictEqual(getAppUrl(), "https://vaani-preview-123.vercel.app");
-    } finally {
-      restoreEnv();
-    }
-  });
-
-  it("should fallback to http://localhost:3000 when no environment variables are present", () => {
-    try {
-      delete process.env.NEXT_PUBLIC_APP_URL;
-      delete process.env.VERCEL_ENV;
-      delete process.env.VERCEL_URL;
-      delete process.env.VERCEL;
-      delete process.env.VERCEL_PROJECT_PRODUCTION_URL;
-      assert.strictEqual(getAppUrl(), "http://localhost:3000");
+      process.env.APP_URL = "https://www.vaani-ai.online/";
+      assert.strictEqual(getAppUrl(), "https://vaani-ai.online");
     } finally {
       restoreEnv();
     }
@@ -75,7 +65,9 @@ describe("Polar Checkout and Application URL Resolution", () => {
 
   it("should construct valid Polar checkout successUrl and returnUrl pointing to /dashboard", () => {
     try {
-      process.env.NEXT_PUBLIC_APP_URL = "https://vaani-ai.online";
+      envRecord.NODE_ENV = "production";
+      delete process.env.APP_URL;
+      delete process.env.NEXT_PUBLIC_APP_URL;
       const baseUrl = getAppUrl();
       const successUrl = `${baseUrl}/dashboard?checkout_id={CHECKOUT_ID}`;
       const returnUrl = `${baseUrl}/dashboard`;
@@ -88,6 +80,43 @@ describe("Polar Checkout and Application URL Resolution", () => {
       assert.ok(successUrl.includes("checkout_id={CHECKOUT_ID}"));
       assert.ok(successUrl.startsWith("https://vaani-ai.online/dashboard"));
       assert.ok(returnUrl === "https://vaani-ai.online/dashboard");
+    } finally {
+      restoreEnv();
+    }
+  });
+
+  it("should construct valid Polar customer session returnUrl pointing to /dashboard", () => {
+    try {
+      envRecord.NODE_ENV = "production";
+      delete process.env.APP_URL;
+      delete process.env.NEXT_PUBLIC_APP_URL;
+      const baseUrl = getAppUrl();
+      const returnUrl = `${baseUrl}/dashboard`;
+
+      assert.strictEqual(returnUrl, "https://vaani-ai.online/dashboard");
+    } finally {
+      restoreEnv();
+    }
+  });
+
+  it("should throw an error if APP_URL is set to localhost in production", () => {
+    try {
+      process.env.APP_URL = "http://localhost:3000";
+      envRecord.NODE_ENV = "production";
+      assert.throws(
+        () => getAppUrl(),
+        /APP_URL cannot be localhost in production/,
+      );
+    } finally {
+      restoreEnv();
+    }
+  });
+
+  it("should safely handle raw URLs without protocol", () => {
+    try {
+      process.env.APP_URL = "vaani-ai.online";
+      envRecord.NODE_ENV = "production";
+      assert.strictEqual(getAppUrl(), "https://vaani-ai.online");
     } finally {
       restoreEnv();
     }
