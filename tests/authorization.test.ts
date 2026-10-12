@@ -2,7 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 
 describe("HTTP Authorization & Middleware Behavior", () => {
-  const baseUrl = "http://localhost:3000";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
   it("should return HTTP 401 Unauthorized JSON for unauthenticated API requests", async () => {
     const res = await fetch(`${baseUrl}/api/voices/create`, {
