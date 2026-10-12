@@ -6,7 +6,7 @@ The platform provides built-in voices as well as custom voice creation, configur
 
 ## Live Demo
 
-[Visit VAANI](https://vaani-ai-voice.vercel.app/)
+[Visit VAANI](https://vaani-ai.online)
 
 ## Features
 
