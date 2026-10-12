@@ -16,6 +16,7 @@ export const env = createEnv({
     R2_BUCKET_NAME: z.string().min(1),
     CHATTERBOX_API_URL: z.url(),
     CHATTERBOX_API_KEY: z.string().min(1),
+    APP_URL: z.string().url().optional(),
   },
 
   client: {
@@ -29,23 +30,36 @@ export const env = createEnv({
 });
 
 export function getAppUrl(): string {
-  if (process.env.NEXT_PUBLIC_APP_URL) {
-    return process.env.NEXT_PUBLIC_APP_URL.replace(/\/+$/, "");
-  }
+  const isProduction =
+    process.env.VERCEL_ENV === "production" ||
+    process.env.NODE_ENV === "production";
+
+  const raw =
+    process.env.APP_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    (isProduction
+      ? "https://vaani-ai.online"
+      : "http://localhost:3000");
+
+  const trimmed = raw.trim();
+  const withProtocol = /^https?:\/\//i.test(trimmed)
+    ? trimmed
+    : `https://${trimmed}`;
+
+  const url = new URL(withProtocol);
 
   if (
-    process.env.VERCEL_ENV === "production" ||
-    (process.env.VERCEL && process.env.NODE_ENV === "production")
+    isProduction &&
+    ["localhost", "127.0.0.1", "::1", "[::1]"].includes(url.hostname)
   ) {
-    if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
-      return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`.replace(/\/+$/, "");
-    }
-    return "https://vaani-ai.online";
+    throw new Error(
+      "Invalid configuration: APP_URL cannot be localhost in production.",
+    );
   }
 
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`.replace(/\/+$/, "");
+  if (url.hostname.startsWith("www.")) {
+    url.hostname = url.hostname.slice(4);
   }
 
-  return "http://localhost:3000";
+  return url.origin;
 }
