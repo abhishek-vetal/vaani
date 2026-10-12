@@ -34,7 +34,7 @@ export const billingRouter = createTRPCRouter({
     const result = await polar.checkouts.create({
       products: [env.POLAR_PRODUCT_ID],
       externalCustomerId: ctx.orgId,
-      successUrl: `${baseUrl}/dashboard?checkout_id={CHECKOUT_ID}`,
+      successUrl: `${baseUrl}/dashboard`,
       returnUrl: `${baseUrl}/dashboard`,
     });
 
