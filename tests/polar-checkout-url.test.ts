@@ -69,17 +69,14 @@ describe("Polar Checkout and Application URL Resolution", () => {
       delete process.env.APP_URL;
       delete process.env.NEXT_PUBLIC_APP_URL;
       const baseUrl = getAppUrl();
-      const successUrl = `${baseUrl}/dashboard?checkout_id={CHECKOUT_ID}`;
+      const successUrl = `${baseUrl}/dashboard`;
       const returnUrl = `${baseUrl}/dashboard`;
 
       assert.strictEqual(
         successUrl,
-        "https://vaani-ai.online/dashboard?checkout_id={CHECKOUT_ID}",
+        "https://vaani-ai.online/dashboard",
       );
       assert.strictEqual(returnUrl, "https://vaani-ai.online/dashboard");
-      assert.ok(successUrl.includes("checkout_id={CHECKOUT_ID}"));
-      assert.ok(successUrl.startsWith("https://vaani-ai.online/dashboard"));
-      assert.ok(returnUrl === "https://vaani-ai.online/dashboard");
     } finally {
       restoreEnv();
     }
