@@ -5,7 +5,23 @@ const isPublicRoute = createRouteMatcher(["/", "/sign-in(.*)", "/sign-up(.*)"]);
 const isOrgSelectionRoute = createRouteMatcher(["/org-selection(.*)"]);
 const isApiRoute = createRouteMatcher(["/api(.*)", "/trpc(.*)"]);
 
+const sensitiveParams = [
+  "customer_session_token",
+  "checkout_id",
+  "token",
+  "session_id",
+];
+
 export default clerkMiddleware(async (auth, req) => {
+  // Strip sensitive tokens immediately on the server before anything else
+  if (sensitiveParams.some((param) => req.nextUrl.searchParams.has(param))) {
+    const cleanUrl = req.nextUrl.clone();
+    for (const param of sensitiveParams) {
+      cleanUrl.searchParams.delete(param);
+    }
+    return NextResponse.redirect(cleanUrl);
+  }
+
   const { userId, orgId } = await auth();
 
   if (isPublicRoute(req)) {
