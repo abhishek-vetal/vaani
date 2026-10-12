@@ -18,7 +18,34 @@ export const env = createEnv({
     CHATTERBOX_API_KEY: z.string().min(1),
   },
 
-  experimental__runtimeEnv: {},
-  skipValidation: !!process.env.SKIP_ENV_VALIDATION,
+  client: {
+    NEXT_PUBLIC_APP_URL: z.string().url().optional(),
+  },
 
+  experimental__runtimeEnv: {
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+  },
+  skipValidation: !!process.env.SKIP_ENV_VALIDATION,
 });
+
+export function getAppUrl(): string {
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL.replace(/\/+$/, "");
+  }
+
+  if (
+    process.env.VERCEL_ENV === "production" ||
+    (process.env.VERCEL && process.env.NODE_ENV === "production")
+  ) {
+    if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+      return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`.replace(/\/+$/, "");
+    }
+    return "https://vaani-ai.online";
+  }
+
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`.replace(/\/+$/, "");
+  }
+
+  return "http://localhost:3000";
+}

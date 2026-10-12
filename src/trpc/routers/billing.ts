@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { polar } from "@/lib/polar";
-import { env } from "@/lib/env";
+import { env, getAppUrl } from "@/lib/env";
 import { createTRPCRouter, orgProcedure } from "../init";
 
 let cachedMeterPrices: Map<string, number> | null = null;
@@ -30,10 +30,12 @@ async function getMeterPrices(): Promise<Map<string, number>> {
 
 export const billingRouter = createTRPCRouter({
   createCheckout: orgProcedure.mutation(async ({ ctx }) => {
+    const baseUrl = getAppUrl();
     const result = await polar.checkouts.create({
       products: [env.POLAR_PRODUCT_ID],
       externalCustomerId: ctx.orgId,
-      successUrl: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+      successUrl: `${baseUrl}/dashboard?checkout_id={CHECKOUT_ID}`,
+      returnUrl: `${baseUrl}/dashboard`,
     });
 
     if (!result.url) {
@@ -47,8 +49,10 @@ export const billingRouter = createTRPCRouter({
   }),
 
   createPortalSession: orgProcedure.mutation(async ({ ctx }) => {
+    const baseUrl = getAppUrl();
     const result = await polar.customerSessions.create({
       externalCustomerId: ctx.orgId,
+      returnUrl: `${baseUrl}/dashboard`,
     });
 
     if (!result.customerPortalUrl) {
@@ -70,7 +74,6 @@ export const billingRouter = createTRPCRouter({
       const hasActiveSubscription =
         (customerState.activeSubscriptions ?? []).length > 0;
 
-      // Sum up invoiced costs from all meters across active subscriptions
       let invoicedCostPaise = 0;
       for (const sub of customerState.activeSubscriptions ?? []) {
         for (const meter of sub.meters ?? []) {
@@ -78,7 +81,6 @@ export const billingRouter = createTRPCRouter({
         }
       }
 
-      // Calculate real-time costs from activeMeters
       let realtimeCostPaise = 0;
       if (customerState.activeMeters && customerState.activeMeters.length > 0) {
         const meterPrices = await getMeterPrices();
@@ -88,7 +90,6 @@ export const billingRouter = createTRPCRouter({
         }
       }
 
-      // Whichever is higher (real-time ongoing usage vs invoiced amount)
       const estimatedCostCents = Math.max(invoicedCostPaise, realtimeCostPaise);
 
       return {
@@ -97,7 +98,6 @@ export const billingRouter = createTRPCRouter({
         estimatedCostCents,
       };
     } catch {
-      // Customer doesn't exist yet in Polar
       return {
         hasActiveSubscription: false,
         customerId: null,
